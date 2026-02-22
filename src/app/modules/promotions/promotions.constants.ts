@@ -1,0 +1,1 @@
+export const PROMOTIONS_CONSTANT = 'someValue';

@@ -4,17 +4,12 @@ import { model, Schema } from 'mongoose';
 import config from '../../../config';
 import ApiError from '../../../errors/ApiError';
 import { IUser, UserModal } from './user.interface';
-import { USER_ROLES, USER_STATUS } from './user.constant';
+import { AUTH_PROVIDERS, USER_ROLES, USER_STATUS } from './user.constant';
 
 const userSchema = new Schema<IUser, UserModal>(
   {
     name: {
       type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: Object.values(USER_ROLES),
       required: true,
     },
     email: {
@@ -25,18 +20,43 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     password: {
       type: String,
-      required: true,
       select: 0,
       minlength: 8,
     },
     phone: {
       type: String,
-      default: '',
+      trim: true,
     },
-    image: {
+    role: {
+      type: String,
+      enum: Object.values(USER_ROLES),
+      required: true,
+    },
+    address: {
       type: String,
       default: '',
     },
+    location: {
+      latitude: {
+        type: Number,
+      },
+      longitude: {
+        type: Number,
+      },
+    },
+    profileImage: {
+      type: String,
+      default: '',
+    },
+    customer: {
+      type: Schema.Types.ObjectId,
+      ref: 'Customer',
+    },
+    permissions: [
+      {
+        type: String,
+      },
+    ],
     status: {
       type: String,
       enum: Object.values(USER_STATUS),
@@ -46,9 +66,32 @@ const userSchema = new Schema<IUser, UserModal>(
       type: Boolean,
       default: false,
     },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
+    },
+    googleId: {
+      type: String,
+      default: null,
+      select: 0,
+    },
+    appleId: {
+      type: String,
+      default: null,
+      select: 0,
+    },
+    authProviders: {
+      type: [String],
+      enum: AUTH_PROVIDERS,
+      default: [],
     },
     authentication: {
       type: {
@@ -67,9 +110,33 @@ const userSchema = new Schema<IUser, UserModal>(
       },
       select: 0,
     },
+    deviceToken: {
+      type: String,
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+userSchema.index(
+  { phone: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      phone: { $exists: true, $type: 'string', $ne: '' },
+      isPhoneVerified: true,
+    },
+  },
+);
+
+userSchema.set('toJSON', {
+  transform: (_doc, ret) => {
+    if (!ret.phone) {
+      ret.phone = ''; // always send empty string to client
+    }
+    return ret;
+  },
+});
 
 //exist user check
 userSchema.statics.isExistUserById = async (id: string) => {
@@ -85,7 +152,7 @@ userSchema.statics.isExistUserByEmail = async (email: string) => {
 //is match password
 userSchema.statics.isMatchPassword = async (
   password: string,
-  hashPassword: string
+  hashPassword: string,
 ): Promise<boolean> => {
   return await bcrypt.compare(password, hashPassword);
 };
@@ -98,11 +165,14 @@ userSchema.pre('save', async function (next) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
   }
 
-  //password hash
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds)
-  );
+  if (this.isModified('password')) {
+    if (this.password) {
+      this.password = await bcrypt.hash(
+        this.password,
+        Number(config.bcrypt_salt_rounds),
+      );
+    }
+  }
   next();
 });
 

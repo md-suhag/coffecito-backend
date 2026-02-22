@@ -1,21 +1,34 @@
-import { Model } from 'mongoose';
-import { USER_ROLES, USER_STATUS } from './user.constant';
+import { Model, Types } from 'mongoose';
+import { AUTH_PROVIDERS, USER_ROLES, USER_STATUS } from './user.constant';
 
 export type IUser = {
   name: string;
-  role: USER_ROLES;
   email: string;
   password: string;
-  phone: string;
-  image?: string;
+  phone?: string;
+  role: USER_ROLES;
+  address?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  profileImage?: string;
+  customer?: Types.ObjectId;
+  permissions?: string[];
   status: USER_STATUS;
   isVerified: boolean;
+  isPhoneVerified: boolean;
+  isEmailVerified: boolean;
   isDeleted: boolean;
+  googleId?: string;
+  appleId?: string;
+  authProviders?: AUTH_PROVIDERS[];
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number;
     expireAt: Date;
   };
+  deviceToken?: string;
 };
 
 export type UserModal = {

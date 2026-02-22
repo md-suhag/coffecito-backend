@@ -110,49 +110,45 @@ export const ${pascalName}Validations = {
 const moduleName: string | undefined = process.argv[2];
 if (!moduleName) {
   console.log(
-    'Please provide a module name, e.g., node generateModule userProfile'
+    'Please provide a module name, e.g., node generateModule userProfile',
   );
 } else {
   createModule(moduleName);
 }
 
 function updateRouterFile(folderName: string, camelName: string): void {
-  const routerPath = path.join(__dirname, 'app/routes', 'index.ts');
+  const routerPath = path.join(__dirname, 'routes', 'index.ts');
 
   const routeImport = `import { ${camelName}Routes } from '../app/modules/${folderName}/${folderName}.route';`;
-  const routeEntry = `{ path: '/${folderName}', route: ${camelName}Routes }`;
+  const routeEntry = `{ path: '/${folderName}s', route: ${camelName}Routes }`;
 
-  let routerFileContent = fs.readFileSync(routerPath, 'utf-8');
+  let content = fs.readFileSync(routerPath, 'utf-8');
 
-  if (!routerFileContent.includes(routeImport)) {
-    routerFileContent = `${routeImport}\n${routerFileContent}`;
+  if (!content.includes(routeImport)) {
+    content = `${routeImport}\n${content}`;
   }
 
-  const apiRoutesRegex =
-    /export const apiRoutes: \{ path: string; route: any \}\[] = \[([\s\S]*?)\]/;
+  const apiRoutesRegex = /const apiRoutes\s*=\s*\[([\s\S]*?)\];?/;
+  const match = content.match(apiRoutesRegex);
 
-  const match = routerFileContent.match(apiRoutesRegex);
-
-  if (match) {
-    const currentRoutes = match[1].trim();
-
-    if (!currentRoutes.includes(routeEntry)) {
-      const updatedRoutes = currentRoutes
-        ? `${currentRoutes}\n  ${routeEntry}`
-        : `${routeEntry}`;
-
-      routerFileContent = routerFileContent.replace(
-        apiRoutesRegex,
-        `export const apiRoutes: { path: string; route: any }[] = [\n  ${updatedRoutes}\n]`
-      );
-    }
-  } else {
-    console.error(
-      'Failed to find apiRoutes array. Ensure index.ts has a properly defined apiRoutes array.'
-    );
+  if (!match) {
+    console.error('apiRoutes array not found');
     return;
   }
 
-  fs.writeFileSync(routerPath, routerFileContent, 'utf-8');
-  console.log(`✅ Added route for ${camelName} to central router.`);
+  const currentRoutes = match[1];
+
+  if (currentRoutes.includes(routeEntry)) return;
+
+  const updatedRoutes = currentRoutes.trim().endsWith(',')
+    ? `${currentRoutes}\n  ${routeEntry},`
+    : `${currentRoutes},\n  ${routeEntry},`;
+
+  content = content.replace(
+    apiRoutesRegex,
+    `const apiRoutes = [\n  ${updatedRoutes}\n];`,
+  );
+
+  fs.writeFileSync(routerPath, content);
+  console.log(`✅ Added route for ${camelName}`);
 }
