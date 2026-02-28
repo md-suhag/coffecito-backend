@@ -3,6 +3,6 @@ import { StoreController } from './store.controller';
 
 const router = express.Router();
 
-router.get('/', StoreController);
+// router.get('/', StoreController);
 
 export const storeRoutes = router;

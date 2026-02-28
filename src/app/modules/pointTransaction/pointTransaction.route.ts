@@ -3,6 +3,6 @@ import { PointTransactionController } from './pointTransaction.controller';
 
 const router = express.Router();
 
-router.get('/', PointTransactionController);
+// router.get('/', PointTransactionController);
 
 export const pointTransactionRoutes = router;

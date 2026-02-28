@@ -3,6 +3,6 @@ import { PromotionsController } from './promotions.controller';
 
 const router = express.Router();
 
-router.get('/', PromotionsController);
+// router.get('/', PromotionsController);
 
 export const promotionsRoutes = router;

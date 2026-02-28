@@ -8,9 +8,9 @@ const router = express.Router();
 
 // create user
 router.post(
-  '/create-user',
+  '/',
   validateRequest(UserValidation.createUserZodSchema),
-  UserController.createUser
+  UserController.createUser,
 );
 
 // update profile
@@ -19,7 +19,7 @@ router.patch(
   auth(),
   fileUploadHandler(),
   validateRequest(UserValidation.updateUserZodSchema),
-  UserController.updateProfile
+  UserController.updateProfile,
 );
 
 // get profile

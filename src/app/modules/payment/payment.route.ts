@@ -3,6 +3,6 @@ import { PaymentController } from './payment.controller';
 
 const router = express.Router();
 
-router.get('/', PaymentController);
+// router.get('/', PaymentController);
 
 export const paymentRoutes = router;

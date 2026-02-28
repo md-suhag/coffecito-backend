@@ -3,6 +3,6 @@ import { GiftCardController } from './giftCard.controller';
 
 const router = express.Router();
 
-router.get('/', GiftCardController);
+// router.get('/', GiftCardController);
 
 export const giftCardRoutes = router;

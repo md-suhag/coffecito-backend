@@ -3,6 +3,6 @@ import { WalletTransactionController } from './walletTransaction.controller';
 
 const router = express.Router();
 
-router.get('/', WalletTransactionController);
+// router.get('/', WalletTransactionController);
 
 export const walletTransactionRoutes = router;

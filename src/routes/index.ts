@@ -1,3 +1,4 @@
+import { categoryRoutes } from '../app/modules/category/category.route';
 import { promotionsRoutes } from '../app/modules/promotions/promotions.route';
 import { notificationRoutes } from '../app/modules/notification/notification.route';
 import { productRoutes } from '../app/modules/product/product.route';
@@ -16,18 +17,6 @@ import { UserRoutes } from '../app/modules/user/user.route';
 const router = express.Router();
 
 const apiRoutes = [
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   {
     path: '/users',
     route: UserRoutes,
@@ -59,7 +48,9 @@ const apiRoutes = [
 
   { path: '/notifications', route: notificationRoutes },
 
-  { path: '/promotionss', route: promotionsRoutes },
+  { path: '/promotions', route: promotionsRoutes },
+
+  { path: '/categories', route: categoryRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
