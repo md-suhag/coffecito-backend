@@ -5,12 +5,31 @@ import {
   PAYMENT_STATUS,
 } from './order.constants';
 
+export type ISelectedCustomization = {
+  customizationId: Types.ObjectId;
+  name: string;
+
+  // For single / multi
+  optionId?: Types.ObjectId;
+  optionLabel?: string;
+  optionPrice?: number;
+
+  // For quantity type
+  quantity?: number;
+  pricePerUnit?: number;
+  totalPrice?: number;
+};
+
 export type IOrderItem = {
   product: Types.ObjectId;
-  variant?: String;
-  addOns?: String[];
+  productName: string;
+  basePrice: number;
   quantity: number;
-  price: number;
+
+  selectedCustomizations: ISelectedCustomization[];
+
+  unitFinalPrice: number;
+  itemTotalPrice: number;
 };
 
 export type IOrderStatusLog = {
@@ -21,16 +40,29 @@ export type IOrderStatusLog = {
 export type IOrder = {
   store: Types.ObjectId;
   customer: Types.ObjectId;
+
   orderId: string;
+
   items: IOrderItem[];
+
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  tipAmount: number;
   totalAmount: number;
+
   paymentMethod: PAYMENT_METHOD;
   paymentStatus: PAYMENT_STATUS;
+
   orderStatus: ORDER_STATUS;
   pickupTime?: Date;
+
   pointsEarned: number;
-  tipAmount: number;
+
   statusLogs: IOrderStatusLog[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type OrderModel = Model<IOrder>;
