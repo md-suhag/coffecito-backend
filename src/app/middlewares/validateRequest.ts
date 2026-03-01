@@ -9,7 +9,7 @@ const validateRequest =
         try {
           const parsed = JSON.parse(req.body?.data);
           req.body = { ...parsed, ...req.body };
-          delete req.body.data;
+          delete req.body?.data;
         } catch (err) {
           return res.status(400).json({
             success: false,

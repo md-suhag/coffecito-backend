@@ -7,37 +7,67 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
-import { USER_ROLES } from './user.constant';
+import { AUTH_PROVIDERS, USER_ROLES } from './user.constant';
+import mongoose from 'mongoose';
+import { Customer } from '../customer/customer.model';
 
-const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-  //set role
-  payload.role = USER_ROLES.CUSTOMER;
-  const createUser = await User.create(payload);
-  if (!createUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+const createUserToDB = async (payload: Partial<IUser>) => {
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    // set default role & provider
+    payload.role = USER_ROLES.CUSTOMER;
+    payload.authProviders = [AUTH_PROVIDERS.LOCAL];
+
+    // create user
+    const createdUser = await User.create([payload], { session });
+    const user = createdUser[0];
+
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+    }
+
+    // generate OTP
+    const otp = generateOTP();
+
+    // update authentication field
+    user.authentication = {
+      oneTimeCode: otp,
+      expireAt: new Date(Date.now() + 3 * 60 * 1000),
+    };
+
+    await user.save({ session });
+
+    // create customer profile
+    await Customer.create(
+      [
+        {
+          user: user._id,
+        },
+      ],
+      { session },
+    );
+
+    // commit transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    // send email AFTER commit
+    const values = {
+      name: user.name,
+      otp,
+      email: user.email!,
+    };
+
+    const template = emailTemplate.createAccount(values);
+    await emailHelper.sendEmail(template);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  //send email
-  const otp = generateOTP(6);
-  const values = {
-    name: createUser.name,
-    otp: otp,
-    email: createUser.email!,
-  };
-  const createAccountTemplate = emailTemplate.createAccount(values);
-  emailHelper.sendEmail(createAccountTemplate);
-
-  //save to DB
-  const authentication = {
-    oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
-  };
-  await User.findOneAndUpdate(
-    { _id: createUser._id },
-    { $set: { authentication } },
-  );
-
-  return createUser;
 };
 
 const getSingleUserFromDB = async (id: string): Promise<Partial<IUser>> => {

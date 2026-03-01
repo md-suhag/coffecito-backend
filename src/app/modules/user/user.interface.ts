@@ -24,7 +24,7 @@ export type IUser = {
   appleId?: string;
   authProviders?: AUTH_PROVIDERS[];
   authentication?: {
-    isResetPassword: boolean;
+    isResetPassword?: boolean;
     oneTimeCode: number;
     expireAt: Date;
   };
