@@ -14,4 +14,11 @@ router.post(
   AdminController.createCategory,
 );
 
+router.patch(
+  '/categories/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  validateRequest(AdminValidations.updateCategoryZodSchema),
+  AdminController.updateCategory,
+);
+
 export const adminRoutes = router;

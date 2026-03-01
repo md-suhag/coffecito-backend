@@ -15,6 +15,19 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AdminServices.updateCategoryToDB(id, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Category updated successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createCategory,
+  updateCategory,
 };

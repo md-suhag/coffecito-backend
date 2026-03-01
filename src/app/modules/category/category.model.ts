@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Query, Schema, model } from 'mongoose';
 import { ICategory, CategoryModel } from './category.interface';
 
 const categorySchema = new Schema<ICategory, CategoryModel>(
@@ -12,11 +12,21 @@ const categorySchema = new Schema<ICategory, CategoryModel>(
       type: Boolean,
       default: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   {
     timestamps: true,
   },
 );
+
+categorySchema.pre<Query<ICategory, ICategory>>(/^find/, function (next) {
+  this.find({ isDeleted: false });
+  next();
+});
 
 export const Category = model<ICategory, CategoryModel>(
   'Category',
