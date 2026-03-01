@@ -3,6 +3,6 @@ import { CategoryController } from './category.controller';
 
 const router = express.Router();
 
-// router.get('/', CategoryController);
+router.get('/', CategoryController.getAllActiveCategories);
 
 export const categoryRoutes = router;
