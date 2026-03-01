@@ -66,10 +66,25 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const resendVerificationEmail = catchAsync(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+    const result = await AuthService.resendVerificationEmailToDB(email);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'OTP Generate and send successfull',
+      data: result,
+    });
+  },
+);
+
 export const AuthController = {
   verifyEmail,
   loginUser,
   forgetPassword,
   resetPassword,
   changePassword,
+  resendVerificationEmail,
 };
