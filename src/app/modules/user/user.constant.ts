@@ -1,19 +1,19 @@
 export enum USER_ROLES {
-  SUPER_ADMIN = 'Super Admin',
-  ADMIN = 'Admin',
-  CUSTOMER = 'Customer',
-  BARISTA = 'Barista',
-  STORE_OWNER = 'Store Owner',
-  MARKETER = 'Marketer',
+  SUPER_ADMIN = 'super_admin',
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+  BARISTA = 'barista',
+  STORE_OWNER = 'store_owner',
+  MARKETER = 'marketer',
 }
 
 export enum USER_STATUS {
-  ACTIVE = 'Active',
-  INACTIVE = 'Inactive',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }
 
 export enum AUTH_PROVIDERS {
-  GOOGLE = 'Google',
-  APPLE = 'Apple',
-  LOCAL = 'Local',
+  GOOGLE = 'google',
+  APPLE = 'apple',
+  LOCAL = 'local',
 }

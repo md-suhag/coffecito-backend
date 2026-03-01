@@ -1,3 +1,4 @@
+import { adminRoutes } from '../app/modules/admin/admin.route';
 import { categoryRoutes } from '../app/modules/category/category.route';
 import { promotionsRoutes } from '../app/modules/promotions/promotions.route';
 import { notificationRoutes } from '../app/modules/notification/notification.route';
@@ -51,6 +52,8 @@ const apiRoutes = [
   { path: '/promotions', route: promotionsRoutes },
 
   { path: '/categories', route: categoryRoutes },
+
+  { path: '/admin', route: adminRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
