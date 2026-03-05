@@ -1,0 +1,1 @@
+export const STRIPE_EVENT_CONSTANT = 'someValue';

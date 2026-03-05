@@ -36,6 +36,9 @@ const walletTransactionSchema = new Schema<
       type: Number,
       required: true,
     },
+    paymentGatewayData: {
+      type: Object,
+    },
     status: {
       type: String,
       enum: WALLET_TRANSACTION_STATUS,

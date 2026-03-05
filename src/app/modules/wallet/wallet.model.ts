@@ -11,6 +11,7 @@ const walletSchema = new Schema<IWallet, WalletModel>(
     },
     balance: {
       type: Number,
+      min: 0,
       default: 0,
     },
   },

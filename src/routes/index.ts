@@ -1,3 +1,4 @@
+import { stripeEventRoutes } from '../app/modules/stripeEvent/stripeEvent.route';
 import { adminRoutes } from '../app/modules/admin/admin.route';
 import { categoryRoutes } from '../app/modules/category/category.route';
 import { promotionsRoutes } from '../app/modules/promotions/promotions.route';
@@ -18,6 +19,7 @@ import { UserRoutes } from '../app/modules/user/user.route';
 const router = express.Router();
 
 const apiRoutes = [
+  
   {
     path: '/users',
     route: UserRoutes,
@@ -54,6 +56,8 @@ const apiRoutes = [
   { path: '/categories', route: categoryRoutes },
 
   { path: '/admin', route: adminRoutes },
+
+  { path: '/stripeEvents', route: stripeEventRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));

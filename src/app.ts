@@ -5,7 +5,15 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './routes';
 import { Morgan } from './shared/morgen';
 import config from './config';
+import { handleStripeWebhook } from './webhook/handleStripeWebhook';
+
 const app = express();
+
+app.use(
+  '/api/v1/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook,
+);
 
 //morgan
 app.use(Morgan.successHandler);
@@ -28,7 +36,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send(
     `<h1 style="text-align:center; color:#173616; font-family:Verdana;">Beep-beep! The ${config.server_name} server is alive and kicking.</h1>
     <p style="text-align:center; color:#173616; font-family:Verdana;">${date}</p>
-    `
+    `,
   );
 });
 
