@@ -16,4 +16,10 @@ router.post(
   ProductController.createProduct,
 );
 
+router.get(
+  '/',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  ProductController.getAllProducts,
+);
+
 export const productRoutes = router;

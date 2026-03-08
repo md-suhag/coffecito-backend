@@ -4,3 +4,5 @@ export enum CUSTOMIZATION_TYPE {
   MULTI = 'multi',
   QUANTITY = 'quantity',
 }
+
+export const PRODUCT_SEARCHABLE_FIELDS = ['name'];
