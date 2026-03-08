@@ -75,9 +75,22 @@ const getAllStores = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const connectStripe = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await StoreServices.connectStripeIntoDB(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Stripe connected successfully',
+    data: result,
+  });
+});
+
 export const StoreController = {
   createStore,
   getAllStores,
   updateStore,
   deleteStore,
+  connectStripe,
 };

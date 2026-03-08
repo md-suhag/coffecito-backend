@@ -6,6 +6,7 @@ import { handleCheckoutSessionCompleted } from './handleCheckoutSessionCompleted
 import { handleCheckoutSessionExpired } from './handleCheckoutSessionExpired';
 import { StripeEvent } from '../app/modules/stripeEvent/stripeEvent.model';
 import { handlePaymentIntentSucceeded } from './handlePaymentIntentSucceeded';
+import { handleAccountUpdated } from './handleAccountUpdated';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event;
@@ -16,13 +17,25 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Missing stripe signature header' });
   }
   const platformSecret = config.stripe.stripeWebhookSecret;
+  const connectSecret = config.stripe.connectWebhookSecret;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      signature,
-      platformSecret as string,
-    );
+    try {
+      // Try platform secret first
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        platformSecret as string,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      // Try connected account secret if platform one fails
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        connectSecret as string,
+      );
+    }
   } catch (err) {
     console.error(
       '❌ Webhook signature verification failed:',
@@ -49,6 +62,10 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         break;
       case 'checkout.session.expired':
         await handleCheckoutSessionExpired(event as Stripe.Event);
+        break;
+
+      case 'account.updated':
+        await handleAccountUpdated(event as Stripe.Event);
         break;
 
       default:

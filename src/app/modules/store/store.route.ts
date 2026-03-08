@@ -36,4 +36,10 @@ router.get(
   StoreController.getAllStores,
 );
 
+router.post(
+  '/:id/connect-stripe',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  StoreController.connectStripe,
+);
+
 export const storeRoutes = router;
