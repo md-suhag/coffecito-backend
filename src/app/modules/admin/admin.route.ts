@@ -21,4 +21,10 @@ router.patch(
   AdminController.updateCategory,
 );
 
+router.post(
+  '/contact-us',
+  validateRequest(AdminValidations.contactUsSchema),
+  AdminController.contactUs,
+);
+
 export const adminRoutes = router;

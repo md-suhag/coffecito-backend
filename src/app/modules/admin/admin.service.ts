@@ -2,6 +2,10 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { ICategory } from '../category/category.interface';
 import { Category } from '../category/category.model';
+import { IContactUs } from '../contactUs/contactUs.interface';
+import { ContactUs } from '../contactUs/contactUs.model';
+import { emailTemplate } from '../../../shared/emailTemplate';
+import { emailHelper } from '../../../helpers/emailHelper';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -20,7 +24,14 @@ const updateCategoryToDB = async (id: string, payload: Partial<ICategory>) => {
   return result;
 };
 
+const contactUs = async (payload: IContactUs) => {
+  const result = await ContactUs.create(payload);
+  const contactUsEmailTemplate = emailTemplate.contactUs(payload);
+  await emailHelper.sendEmail(contactUsEmailTemplate);
+  return result;
+};
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
+  contactUs,
 };

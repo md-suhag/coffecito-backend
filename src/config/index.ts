@@ -11,6 +11,7 @@ export default {
   port_dev: process.env.PORT_DEV,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   website_url: process.env.WEBSITE_URL,
+  logo_url: process.env.LOGO_URL,
   jwt: {
     jwt_secret: process.env.JWT_SECRET,
     jwt_expire_in: process.env.JWT_EXPIRE_IN,
@@ -21,6 +22,7 @@ export default {
     port: process.env.EMAIL_PORT,
     host: process.env.EMAIL_HOST,
     pass: process.env.EMAIL_PASS,
+    supportEmail: process.env.SUPPORT_EMAIL,
   },
   super_admin: {
     email: process.env.SUPER_ADMIN_EMAIL,

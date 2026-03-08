@@ -27,7 +27,19 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const contactUs = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.contactUs(req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Contact us message sent successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
+  contactUs,
 };

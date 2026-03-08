@@ -1,3 +1,4 @@
+import { IContactUs } from '../app/modules/contactUs/contactUs.interface';
 import config from '../config';
 import { ICreateAccount, IResetPassword } from '../types/emailTamplate';
 
@@ -57,7 +58,27 @@ const resetPassword = (values: IResetPassword) => {
   return data;
 };
 
+const contactUs = (values: IContactUs) => {
+  const data = {
+    to: config.email.supportEmail as string,
+    subject: `${values.subject}`,
+    html: `<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
+    <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <img src=${config.logo_url} alt="Logo" style="display: block; margin: 0 auto 20px; width:150px" />
+        <div style="text-align: center;">
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Name:${values.name}</p>
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Email:${values.email}</p>
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;"><b>Message:</b> ${values.message}</p>
+         
+        </div>
+    </div>
+</body>`,
+  };
+  return data;
+};
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
+  contactUs,
 };
