@@ -25,6 +25,7 @@ export type IProduct = {
   dietaryLabels: string[];
   readyTime: number; // in minutes
   isActive: boolean;
+  isDeleted: boolean;
 };
 
 export type ProductModel = Model<IProduct>;

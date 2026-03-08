@@ -32,6 +32,21 @@ const createProductValidationSchema = z.object({
   }),
 });
 
+const updateProductValidationSchema = z.object({
+  body: z.object({
+    store: z.string().optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    category: z.string().optional(),
+    basePrice: z.number().min(0).optional(),
+    customizations: z.array(customizationValidationSchema).optional(),
+    dietaryLabels: z.array(z.string()).optional(),
+    readyTime: z.number().min(0).optional(),
+    isActive: z.boolean().optional(),
+  }),
+});
+
 export const ProductValidations = {
   createProductValidationSchema,
+  updateProductValidationSchema,
 };

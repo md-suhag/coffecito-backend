@@ -22,4 +22,18 @@ router.get(
   ProductController.getAllProducts,
 );
 
+router.patch(
+  '/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  fileUploadHandler(),
+  validateRequest(ProductValidations.updateProductValidationSchema),
+  ProductController.updateProduct,
+);
+
+router.delete(
+  '/:id/soft',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  ProductController.deleteProduct,
+);
+
 export const productRoutes = router;
