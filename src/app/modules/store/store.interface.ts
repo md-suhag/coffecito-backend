@@ -1,13 +1,15 @@
 import { Model } from 'mongoose';
+import { STORE_OPEN_DAY } from './store.constants';
 
 export type IStoreHours = {
-  day: string;
+  day: STORE_OPEN_DAY;
   open: string;
   close: string;
 };
 
 export type IStore = {
   name: string;
+  image: string;
   address: string;
   location: {
     type: 'Point';
