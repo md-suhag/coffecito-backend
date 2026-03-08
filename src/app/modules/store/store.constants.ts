@@ -9,3 +9,5 @@ export enum STORE_OPEN_DAY {
   SATURDAY = 'Saturday',
   SUNDAY = 'Sunday',
 }
+
+export const STORE_SEARCHABLE_FIELDS = ['name', 'address'];

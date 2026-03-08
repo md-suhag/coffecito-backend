@@ -26,6 +26,58 @@ const createStore = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateStore = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  let image = getSingleFilePath(req.files, 'image');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = image ? { image, ...req.body } : { ...req.body };
+
+  if (req.body.longitude && req.body.latitude) {
+    data.location = {
+      type: 'Point',
+      coordinates: [Number(req.body.longitude), Number(req.body.latitude)],
+    };
+  }
+
+  const result = await StoreServices.updateStoreIntoDB(id, data);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Store updated successfully',
+    data: result,
+  });
+});
+
+const deleteStore = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await StoreServices.deleteStoreFromDB(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Store deleted successfully',
+    data: result,
+  });
+});
+
+const getAllStores = catchAsync(async (req: Request, res: Response) => {
+  const result = await StoreServices.getAllStoresFromDB(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Stores fetched successfully',
+    data: result.stores,
+    pagination: result.meta,
+  });
+});
+
 export const StoreController = {
   createStore,
+  getAllStores,
+  updateStore,
+  deleteStore,
 };

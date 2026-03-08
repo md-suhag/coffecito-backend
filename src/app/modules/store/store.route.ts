@@ -16,4 +16,24 @@ router.post(
   StoreController.createStore,
 );
 
+router.patch(
+  '/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  fileUploadHandler(),
+  validateRequest(StoreValidations.updateStoreValidationSchema),
+  StoreController.updateStore,
+);
+
+router.delete(
+  '/:id/soft',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  StoreController.deleteStore,
+);
+
+router.get(
+  '/',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  StoreController.getAllStores,
+);
+
 export const storeRoutes = router;

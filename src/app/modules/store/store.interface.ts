@@ -20,6 +20,7 @@ export type IStore = {
   stripeAccountId?: string;
   isConnectedAccountReady?: boolean;
   isActive: boolean;
+  isDeleted: boolean;
   about?: string;
 };
 

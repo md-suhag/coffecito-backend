@@ -27,6 +27,20 @@ const createStoreValidationSchema = z.object({
   }),
 });
 
+const updateStoreValidationSchema = z.object({
+  body: z.object({
+    name: z.string().optional(),
+    address: z.string().optional(),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
+    phone: z.string().optional(),
+    hours: z.array(storeHoursValidationSchema).optional(),
+    about: z.string().optional(),
+    isActive: z.boolean().optional(),
+  }),
+});
+
 export const StoreValidations = {
   createStoreValidationSchema,
+  updateStoreValidationSchema,
 };

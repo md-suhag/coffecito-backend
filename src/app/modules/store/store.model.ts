@@ -59,6 +59,10 @@ const storeSchema = new Schema<IStore, StoreModel>(
       type: Boolean,
       default: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     about: {
       type: String,
     },
@@ -67,5 +71,21 @@ const storeSchema = new Schema<IStore, StoreModel>(
     timestamps: true,
   },
 );
+
+// Filter out deleted stores for find queries
+storeSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+storeSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+storeSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
 
 export const Store = model<IStore, StoreModel>('Store', storeSchema);
