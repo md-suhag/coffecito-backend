@@ -20,6 +20,22 @@ const addMoneyIntoWallet = catchAsync(
   },
 );
 
+const getMyWallet = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    const result = await WalletServices.getMyWallet(user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'My wallet fetched successfully',
+      data: result,
+    });
+  },
+);
+
 export const WalletController = {
   addMoneyIntoWallet,
+  getMyWallet,
 };

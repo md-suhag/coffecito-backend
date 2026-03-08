@@ -2,6 +2,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { IWallet } from './wallet.interface';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
+import { Wallet } from './wallet.model';
 
 const addMoneyIntoWallet = async (amount: number, user: JwtPayload) => {
   const session = await stripe.checkout.sessions.create({
@@ -38,6 +39,14 @@ const addMoneyIntoWallet = async (amount: number, user: JwtPayload) => {
   return { checkoutUrl: session.url };
 };
 
+const getMyWallet = async (user: JwtPayload) => {
+  const wallet = await Wallet.findOne({ user: user.id })
+    .select('balance')
+    .lean();
+  return wallet;
+};
+
 export const WalletServices = {
   addMoneyIntoWallet,
+  getMyWallet,
 };

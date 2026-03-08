@@ -14,4 +14,6 @@ router.post(
   WalletController.addMoneyIntoWallet,
 );
 
+router.get('/balance', auth(USER_ROLES.CUSTOMER), WalletController.getMyWallet);
+
 export const walletRoutes = router;
