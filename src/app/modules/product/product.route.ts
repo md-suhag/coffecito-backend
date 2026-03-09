@@ -36,4 +36,6 @@ router.delete(
   ProductController.deleteProduct,
 );
 
+router.get('/:id', ProductController.getProductById);
+
 export const productRoutes = router;
