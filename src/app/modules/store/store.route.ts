@@ -10,4 +10,6 @@ const router = express.Router();
 
 router.get('/', StoreController.getAllStoresForCustomer);
 
+router.get('/:id/products', StoreController.getAllProductsOfAStore);
+
 export const storeRoutes = router;

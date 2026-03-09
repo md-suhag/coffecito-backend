@@ -7,6 +7,8 @@ import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
+import { Product } from '../product/product.model';
+import { PRODUCT_SEARCHABLE_FIELDS } from '../product/product.constants';
 
 const createStoreIntoDB = async (payload: IStore) => {
   const result = await Store.create(payload);
@@ -141,6 +143,32 @@ const connectStripeIntoDB = async (id: string) => {
   };
 };
 
+const getAllProductsOfAStoreFromDB = async (
+  id: string,
+  query: Record<string, unknown>,
+) => {
+  const productsQuery = new QueryBuilder(
+    Product.find({ store: id }).select(
+      'store category name image readyTime basePrice dietaryLabels',
+    ),
+    query,
+  )
+    .search(PRODUCT_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate();
+
+  const [products, meta] = await Promise.all([
+    productsQuery.modelQuery,
+    productsQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    products,
+    meta,
+  };
+};
+
 export const StoreServices = {
   createStoreIntoDB,
   getAllStoresFromDB,
@@ -148,4 +176,5 @@ export const StoreServices = {
   updateStoreIntoDB,
   deleteStoreFromDB,
   connectStripeIntoDB,
+  getAllProductsOfAStoreFromDB,
 };

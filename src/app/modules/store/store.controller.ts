@@ -101,6 +101,24 @@ const connectStripe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllProductsOfAStore = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await StoreServices.getAllProductsOfAStoreFromDB(
+      id,
+      req.query,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Products fetched successfully',
+      data: result.products,
+      pagination: result.meta,
+    });
+  },
+);
+
 export const StoreController = {
   createStore,
   getAllStores,
@@ -108,4 +126,5 @@ export const StoreController = {
   updateStore,
   deleteStore,
   connectStripe,
+  getAllProductsOfAStore,
 };
