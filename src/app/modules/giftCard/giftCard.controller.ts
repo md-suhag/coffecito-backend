@@ -32,7 +32,22 @@ const addGiftCard = catchAsync(
   },
 );
 
+const getMyGiftCardsData = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await GiftCardServices.getMyGiftCardsDataFromDB(user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Gift cards fetched successfully',
+      data: result,
+    });
+  },
+);
+
 export const GiftCardController = {
   createGiftCard,
   addGiftCard,
+  getMyGiftCardsData,
 };

@@ -21,4 +21,10 @@ router.post(
   GiftCardController.addGiftCard,
 );
 
+router.get(
+  '/',
+  auth(USER_ROLES.CUSTOMER),
+  GiftCardController.getMyGiftCardsData,
+);
+
 export const giftCardRoutes = router;

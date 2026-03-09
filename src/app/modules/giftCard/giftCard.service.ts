@@ -111,7 +111,26 @@ const addGiftCard = async (
   return giftCard;
 };
 
+const getMyGiftCardsDataFromDB = async (user: JwtPayload) => {
+  const customer = await Customer.findOne({ user: user.id });
+  if (!customer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
+  }
+  const giftCards = await GiftCard.find({
+    _id: { $in: customer.giftCards },
+  }).select('amount currentBalance');
+
+  return {
+    totalGiftCards: giftCards.length,
+    totalBalance: giftCards.reduce(
+      (acc, giftCard) => acc + giftCard.currentBalance,
+      0,
+    ),
+  };
+};
+
 export const GiftCardServices = {
   createGiftCard,
   addGiftCard,
+  getMyGiftCardsDataFromDB,
 };
