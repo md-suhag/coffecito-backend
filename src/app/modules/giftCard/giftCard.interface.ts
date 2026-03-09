@@ -9,7 +9,6 @@ export type IGiftCard = {
   receiverEmail: string;
   receiverName: string;
   message?: string;
-  isPaid: boolean;
   status: GIFT_CARD_STATUS;
 };
 
