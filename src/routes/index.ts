@@ -17,6 +17,7 @@ import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
 import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
+import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -44,6 +45,7 @@ const apiRoutes = [
   { path: '/orders', route: orderRoutes },
 
   { path: '/stores', route: storeRoutes },
+  { path: '/admin/stores', route: storeAdminRoutes },
 
   { path: '/payments', route: paymentRoutes },
 
