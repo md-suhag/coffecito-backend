@@ -72,6 +72,8 @@ const storeSchema = new Schema<IStore, StoreModel>(
   },
 );
 
+storeSchema.index({ location: '2dsphere' });
+
 // Filter out deleted stores for find queries
 storeSchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });

@@ -31,6 +31,45 @@ const getAllStoresFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
+const getAllStoresForCustomerFromDB = async (
+  query: Record<string, unknown>,
+) => {
+  const { longitude, latitude, radius, ...restQuery } = query;
+  let modelQuery = Store.find({
+    isDeleted: false,
+    isActive: true,
+  }).select('-stripeAccountId -isConnectedAccountReady');
+
+  if (longitude && latitude) {
+    modelQuery = Store.find({
+      location: {
+        $geoWithin: {
+          $centerSphere: [
+            [Number(longitude), Number(latitude)],
+            10000000 / 6378137, // convert meters to radians (Earth radius in meters)
+          ],
+        },
+      },
+    });
+  }
+
+  const storesQuery = new QueryBuilder(modelQuery, restQuery)
+    .search(STORE_SEARCHABLE_FIELDS)
+    .filter()
+    .sort()
+    .paginate();
+
+  const [stores, meta] = await Promise.all([
+    storesQuery.modelQuery,
+    storesQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    stores,
+    meta,
+  };
+};
+
 const updateStoreIntoDB = async (id: string, payload: Partial<IStore>) => {
   const result = await Store.findByIdAndUpdate(id, payload, {
     new: true,
@@ -105,6 +144,7 @@ const connectStripeIntoDB = async (id: string) => {
 export const StoreServices = {
   createStoreIntoDB,
   getAllStoresFromDB,
+  getAllStoresForCustomerFromDB,
   updateStoreIntoDB,
   deleteStoreFromDB,
   connectStripeIntoDB,

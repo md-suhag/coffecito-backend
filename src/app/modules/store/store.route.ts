@@ -8,6 +8,6 @@ import fileUploadHandler from '../../middlewares/fileUploadHandler';
 
 const router = express.Router();
 
-router.get('/', StoreController.getAllStores);
+router.get('/', StoreController.getAllStoresForCustomer);
 
 export const storeRoutes = router;
