@@ -41,7 +41,7 @@ const createUserToDB = async (payload: Partial<IUser>) => {
     await user.save({ session });
 
     // create customer profile
-    await Customer.create(
+    const createdCustomer = await Customer.create(
       [
         {
           user: user._id,
@@ -49,6 +49,12 @@ const createUserToDB = async (payload: Partial<IUser>) => {
       ],
       { session },
     );
+
+    const customer = createdCustomer[0];
+
+    // include customer id in user
+    user.customer = customer._id;
+    await user.save({ session });
 
     // commit transaction
     await session.commitTransaction();
@@ -71,7 +77,10 @@ const createUserToDB = async (payload: Partial<IUser>) => {
 };
 
 const getSingleUserFromDB = async (id: string): Promise<Partial<IUser>> => {
-  const isExistUser = await User.isExistUserById(id);
+  const isExistUser = await User.findById(id).populate(
+    'customer',
+    'loyaltyPoints favoriteShops favoriteProducts isSubscriptionEmailVerified ',
+  );
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
@@ -88,10 +97,16 @@ const updateProfileToDB = async (
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
+  if (payload?.phone && isExistUser.isPhoneVerified === true) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Phone already verified! you can not update phone number',
+    );
+  }
 
   //unlink file here
-  if (payload.image && isExistUser.image) {
-    unlinkFile(isExistUser.image);
+  if (payload.profileImage && isExistUser.profileImage) {
+    unlinkFile(isExistUser.profileImage);
   }
 
   const updateDoc = await User.findOneAndUpdate({ _id: id }, payload, {

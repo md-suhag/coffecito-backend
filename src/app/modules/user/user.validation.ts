@@ -24,13 +24,31 @@ const createUserZodSchema = z.object({
 });
 
 const updateUserZodSchema = z.object({
-  name: z.string().optional(),
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  image: z.string().optional(),
-  status: z.nativeEnum(USER_STATUS).optional(),
-});
+  body: z
+    .object({
+      name: z.string().optional(),
+      phone: z.string().optional(),
+      address: z.string().optional(),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+    })
+    .strict()
+    .refine(
+      data => {
+        const hasAddress = data.address !== undefined;
+        const hasLat = data.latitude !== undefined;
+        const hasLng = data.longitude !== undefined;
 
+        return (
+          (hasAddress && hasLat && hasLng) ||
+          (!hasAddress && !hasLat && !hasLng)
+        );
+      },
+      {
+        message: 'Address, latitude, and longitude must be provided together',
+      },
+    ),
+});
 export const UserValidation = {
   createUserZodSchema,
   updateUserZodSchema,
