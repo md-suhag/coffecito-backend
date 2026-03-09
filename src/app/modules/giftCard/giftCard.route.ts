@@ -14,4 +14,11 @@ router.post(
   GiftCardController.createGiftCard,
 );
 
+router.post(
+  '/add',
+  auth(USER_ROLES.CUSTOMER),
+  validateRequest(GiftCardValidations.addGiftCardZodSchema),
+  GiftCardController.addGiftCard,
+);
+
 export const giftCardRoutes = router;

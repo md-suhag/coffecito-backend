@@ -35,6 +35,12 @@ const customerSchema = new Schema<ICustomer, CustomerModel>(
       type: Schema.Types.ObjectId,
       ref: 'Product',
     },
+    giftCards: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'GiftCard',
+      },
+    ],
   },
   {
     timestamps: true,

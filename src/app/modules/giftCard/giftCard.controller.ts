@@ -18,6 +18,21 @@ const createGiftCard = catchAsync(
   },
 );
 
+const addGiftCard = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await GiftCardServices.addGiftCard(req.body, user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Gift card added to your account successfully',
+      data: result,
+    });
+  },
+);
+
 export const GiftCardController = {
   createGiftCard,
+  addGiftCard,
 };

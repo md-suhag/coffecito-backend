@@ -8,6 +8,7 @@ export type ICustomer = {
   subscriptionEmail?: string;
   isSubscriptionEmailVerified: boolean;
   lastOrderProduct?: Types.ObjectId;
+  giftCards: Types.ObjectId[];
 };
 
 export type CustomerModel = Model<ICustomer>;
