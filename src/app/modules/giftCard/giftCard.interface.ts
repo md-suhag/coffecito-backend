@@ -7,6 +7,9 @@ export type IGiftCard = {
   currentBalance: number;
   sender: Types.ObjectId;
   receiverEmail: string;
+  receiverName: string;
+  message?: string;
+  isPaid: boolean;
   status: GIFT_CARD_STATUS;
 };
 

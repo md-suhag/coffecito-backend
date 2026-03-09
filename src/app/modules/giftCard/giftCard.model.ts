@@ -26,10 +26,19 @@ const giftCardSchema = new Schema<IGiftCard, GiftCardModel>(
       type: String,
       required: true,
     },
+    receiverName: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: false,
+    },
+
     status: {
       type: String,
-      enum: GIFT_CARD_STATUS,
-      default: GIFT_CARD_STATUS.ACTIVE,
+      enum: Object.values(GIFT_CARD_STATUS),
+      default: GIFT_CARD_STATUS.PENDING,
     },
   },
   {

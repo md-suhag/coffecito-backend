@@ -1,6 +1,10 @@
 import { IContactUs } from '../app/modules/contactUs/contactUs.interface';
 import config from '../config';
-import { ICreateAccount, IResetPassword } from '../types/emailTamplate';
+import {
+  ICreateAccount,
+  IResetPassword,
+  ISendGiftCard,
+} from '../types/emailTamplate';
 
 const createAccount = (values: ICreateAccount) => {
   const data = {
@@ -77,8 +81,41 @@ const contactUs = (values: IContactUs) => {
   return data;
 };
 
+const sendGiftCard = (values: ISendGiftCard) => {
+  const data = {
+    to: values.email,
+    subject: 'You received a Gift Card!',
+    html: `
+      <body style="font-family: 'Trebuchet MS', sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
+          <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+              <img src="${config.logo_url}" alt="Logo" style="display: block; margin: 0 auto 20px; width:150px" />
+              <h2 style="color: #277E16; font-size: 24px; margin-bottom: 20px; text-align: center;">
+                You received a Gift Card!
+              </h2>
+              <div style="text-align: center;">
+                  <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Dear ${values.name},</p>
+                  <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">You have received a gift card of <strong>$${values.amount}</strong>.</p>
+  ${values.senderEmail ? `<p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">From: <strong>${values.senderEmail}</strong>.</p>` : ''}
+                  <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 10px;">Card Number:</p>
+                  <span style="background-color: #277E16; padding: 10px; text-align: center; border-radius: 8px; color: #fff; font-size: 25px; letter-spacing: 2px; margin: 20px auto; display: inline-block;">
+                      ${values.cardNumber}
+                  </span>
+                  ${values.message ? `<p style="color: #555; font-size: 16px; line-height: 1.5; margin-top: 20px; font-style: italic;">"${values.message}"</p>` : ''}
+                  <hr style="border: 0; border-top: 1px solid #ddd; margin: 30px 0;" />
+                  <p style="color: #277E16; font-size: 18px; line-height: 1.5; margin-bottom: 20px; font-weight: bold;">
+                    You can use this after you sign up to the app. Save this email for your records!
+                  </p>
+              </div>
+          </div>
+      </body>
+    `,
+  };
+  return data;
+};
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
   contactUs,
+  sendGiftCard,
 };
