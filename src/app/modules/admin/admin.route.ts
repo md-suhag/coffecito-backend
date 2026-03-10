@@ -27,4 +27,17 @@ router.post(
   AdminController.contactUs,
 );
 
+router.get(
+  '/customers',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getAllCustomers,
+);
+
+router.patch(
+  '/customers/:id/status',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  validateRequest(AdminValidations.updateCustomerStatusZodSchema),
+  AdminController.updateCustomer,
+);
+
 export const adminRoutes = router;

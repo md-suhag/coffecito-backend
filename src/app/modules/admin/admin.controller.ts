@@ -38,8 +38,34 @@ const contactUs = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllCustomers = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getAllCustomers(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Customers fetched successfully',
+    data: result.customers,
+    pagination: result.meta,
+  });
+});
+
+const updateCustomer = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AdminServices.updateCustomer(id, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Customer updated successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
   contactUs,
+  getAllCustomers,
+  updateCustomer,
 };

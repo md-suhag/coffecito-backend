@@ -6,6 +6,11 @@ import { IContactUs } from '../contactUs/contactUs.interface';
 import { ContactUs } from '../contactUs/contactUs.model';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import { emailHelper } from '../../../helpers/emailHelper';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { User } from '../user/user.model';
+import { USER_ROLES } from '../user/user.constant';
+import { USER_SEARCHABLE_FIELDS } from './admin.constants';
+import { IUser } from '../user/user.interface';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -30,8 +35,45 @@ const contactUs = async (payload: IContactUs) => {
   await emailHelper.sendEmail(contactUsEmailTemplate);
   return result;
 };
+
+const getAllCustomers = async (query: Record<string, any>) => {
+  const customersQuery = new QueryBuilder(
+    User.find({
+      role: USER_ROLES.CUSTOMER,
+    }),
+    query,
+  )
+    .sort()
+    .paginate()
+    .search(USER_SEARCHABLE_FIELDS);
+
+  const [customers, meta] = await Promise.all([
+    customersQuery.modelQuery,
+    customersQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    customers,
+    meta,
+  };
+};
+
+const updateCustomer = async (id: string, payload: Partial<IUser>) => {
+  const isExistCustomer = await User.findById(id);
+  if (!isExistCustomer) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Customer doesn't exist!");
+  }
+  const result = await User.findOneAndUpdate({ _id: id }, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
   contactUs,
+  getAllCustomers,
+  updateCustomer,
 };
