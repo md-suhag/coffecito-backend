@@ -63,6 +63,7 @@ export type IOrder = {
   statusLogs: IOrderStatusLog[];
 
   paymentId?: string;
+  stripeFee?: number;
 
   createdAt?: Date;
   updatedAt?: Date;

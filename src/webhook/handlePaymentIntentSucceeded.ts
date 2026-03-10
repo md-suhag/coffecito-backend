@@ -121,7 +121,7 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
         { session },
       );
 
-      // 2. Log Payments & Transer funds to stores (Connect)
+      // 2. Log Payments (without transferring here)
       for (const item of storeBreakdown) {
         // Find the specific order for this store to link in Payment model
         const relatedOrder = await Order.findOne({
@@ -142,25 +142,6 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
             ],
             { session },
           );
-        }
-
-        if (item.stripeAccountId && item.amount > 0) {
-          try {
-            await stripe.transfers.create({
-              amount: Math.round(item.amount * 100), // Transfer 100% to store
-              currency: 'usd',
-              destination: item.stripeAccountId,
-              metadata: {
-                paymentIntentId: paymentIntent.id,
-                storeId: item.storeId,
-              },
-            });
-          } catch (transferError) {
-            console.error(
-              `Failed to transfer to store ${item.storeId}:`,
-              transferError,
-            );
-          }
         }
       }
 

@@ -333,6 +333,7 @@ const createOrderIntoDB = async (
           ),
         },
         payment_intent_data: {
+          transfer_group: orderIds[0],
           metadata: {
             type: 'order_payment',
             userId,

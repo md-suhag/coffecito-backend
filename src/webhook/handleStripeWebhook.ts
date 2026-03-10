@@ -7,6 +7,7 @@ import { handleCheckoutSessionExpired } from './handleCheckoutSessionExpired';
 import { StripeEvent } from '../app/modules/stripeEvent/stripeEvent.model';
 import { handlePaymentIntentSucceeded } from './handlePaymentIntentSucceeded';
 import { handleAccountUpdated } from './handleAccountUpdated';
+import { handleChargeUpdated } from './handleChargeUpdated';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event;
@@ -66,6 +67,10 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
       case 'account.updated':
         await handleAccountUpdated(event as Stripe.Event);
+        break;
+
+      case 'charge.updated':
+        await handleChargeUpdated(event as Stripe.Event);
         break;
 
       default:
