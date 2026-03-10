@@ -1,3 +1,4 @@
+import { cartRoutes } from '../app/modules/cart/cart.route';
 import { stripeEventRoutes } from '../app/modules/stripeEvent/stripeEvent.route';
 import { adminRoutes } from '../app/modules/admin/admin.route';
 import { categoryRoutes } from '../app/modules/category/category.route';
@@ -21,6 +22,7 @@ import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
 const router = express.Router();
 
 const apiRoutes = [
+  
   {
     path: '/users',
     route: UserRoutes,
@@ -61,6 +63,8 @@ const apiRoutes = [
 
   { path: '/stripeEvents', route: stripeEventRoutes },
   { path: '/disclaimers', route: DisclaimerRoutes },
+
+  { path: '/carts', route: cartRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
