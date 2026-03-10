@@ -10,6 +10,8 @@ import { User } from './user.model';
 import { AUTH_PROVIDERS, USER_ROLES } from './user.constant';
 import mongoose from 'mongoose';
 import { Customer } from '../customer/customer.model';
+import { smsTemplate } from '../../../shared/smsTemplate';
+import { smsHelper } from '../../../helpers/smsHelper';
 
 const createUserToDB = async (payload: Partial<IUser>) => {
   const session = await mongoose.startSession();
@@ -90,7 +92,7 @@ const getSingleUserFromDB = async (id: string): Promise<Partial<IUser>> => {
 
 const updateProfileToDB = async (
   user: JwtPayload,
-  payload: Partial<IUser>,
+  payload: Partial<IUser> & { isOnboard?: boolean },
 ): Promise<Partial<IUser | null>> => {
   const { id } = user;
   const isExistUser = await User.isExistUserById(id);
@@ -109,9 +111,39 @@ const updateProfileToDB = async (
     unlinkFile(isExistUser.profileImage);
   }
 
-  const updateDoc = await User.findOneAndUpdate({ _id: id }, payload, {
+  const { isOnboard, ...updatePayload } = payload;
+
+  const updateDoc = await User.findOneAndUpdate({ _id: id }, updatePayload, {
     new: true,
   });
+
+  // Check if we need to send OTP (phone provided, not verified, and it's onboarding flow)
+  if (
+    updatePayload?.phone &&
+    isExistUser.isPhoneVerified === false &&
+    isOnboard
+  ) {
+    const otp = generateOTP();
+    const otpTemplate = smsTemplate.sendOtpToPhone({
+      otp,
+      phone: updatePayload.phone,
+    });
+
+    await smsHelper.sendSMS(otpTemplate);
+
+    // Update authentication field separately (don't return in updateDoc yet as it might not be needed by frontend)
+    await User.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          authentication: {
+            oneTimeCode: otp,
+            expireAt: new Date(Date.now() + 3 * 60 * 1000),
+          },
+        },
+      },
+    );
+  }
 
   return updateDoc;
 };
