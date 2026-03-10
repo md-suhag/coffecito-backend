@@ -16,6 +16,18 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const verifyPhone = catchAsync(async (req: Request, res: Response) => {
+  const { ...verifyData } = req.body;
+  const result = await AuthService.verifyPhoneToDB(verifyData);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Phone verified successfully',
+    data: result,
+  });
+});
+
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { ...loginData } = req.body;
   const result = await AuthService.loginUserFromDB(loginData);
@@ -95,6 +107,7 @@ const resendVerificationPhone = catchAsync(
 );
 export const AuthController = {
   verifyEmail,
+  verifyPhone,
   loginUser,
   forgetPassword,
   resetPassword,

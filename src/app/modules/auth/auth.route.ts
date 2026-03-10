@@ -24,6 +24,12 @@ router.post(
   AuthController.verifyEmail,
 );
 router.post(
+  '/verify-phone',
+  validateRequest(AuthValidation.createVerifyPhoneZodSchema),
+  AuthController.verifyPhone,
+);
+
+router.post(
   '/resend-email-otp',
   validateRequest(AuthValidation.resendEmailOtpZodSchema),
   AuthController.resendVerificationEmail,

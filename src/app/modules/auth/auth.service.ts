@@ -11,6 +11,7 @@ import {
   IChangePassword,
   ILoginData,
   IVerifyEmail,
+  IVerifyPhone,
 } from '../../../types/auth';
 import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
@@ -188,6 +189,62 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   return { data, message };
 };
 
+const verifyPhoneToDB = async (payload: IVerifyPhone) => {
+  const { phone, oneTimeCode: otp } = payload;
+  const oneTimeCode = Number(otp);
+  const isExistUser = await User.findOne({ phone }).select('+authentication');
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+  if (!isExistUser.authentication?.oneTimeCode) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'No OTP found, please request a new one',
+    );
+  }
+
+  if (!oneTimeCode) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Please give the otp, check your phone we send a code',
+    );
+  }
+
+  // match otp
+  if (isExistUser.authentication?.oneTimeCode !== oneTimeCode) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'You provided wrong otp');
+  }
+
+  // check expire time
+  const date = new Date();
+  if (date > isExistUser.authentication?.expireAt) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Otp already expired, Please try again',
+    );
+  }
+
+  // update user verify and authentication status when otp verify successful
+  await User.findOneAndUpdate(
+    { _id: isExistUser._id },
+    {
+      isVerified: true,
+      isPhoneVerified: true,
+      authentication: { oneTimeCode: null, expireAt: null },
+    },
+  );
+
+  //create token
+  const accessToken = jwtHelper.createToken(
+    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expire_in as string,
+  );
+
+  return {
+    accessToken,
+  };
+};
 const resendVerificationEmailToDB = async (email: string) => {
   const existingUser = await User.findOne({ email: email }).lean();
 
@@ -357,6 +414,7 @@ const changePasswordToDB = async (
 
 export const AuthService = {
   verifyEmailToDB,
+  verifyPhoneToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,

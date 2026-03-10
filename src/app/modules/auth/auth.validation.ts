@@ -33,6 +33,16 @@ const createVerifyEmailZodSchema = z.object({
   }),
 });
 
+const createVerifyPhoneZodSchema = z.object({
+  body: z.object({
+    phone: z
+      .string({ message: 'Phone is required' })
+      .nonempty('Phone cannot be empty')
+      .min(8, 'Phone must be at least 8 characters long')
+      .max(15, 'Phone must be at most 15 characters long'),
+    oneTimeCode: z.number({ required_error: 'One time code is required' }),
+  }),
+});
 const resendEmailOtpZodSchema = z.object({
   body: z.object({
     email: z
@@ -86,6 +96,7 @@ const createChangePasswordZodSchema = z.object({
 
 export const AuthValidation = {
   createVerifyEmailZodSchema,
+  createVerifyPhoneZodSchema,
   createForgetPasswordZodSchema,
   createLoginZodSchema,
   createResetPasswordZodSchema,
