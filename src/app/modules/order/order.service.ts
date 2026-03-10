@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import ApiError from '../../../errors/ApiError';
 import { Cart } from '../cart/cart.model';
 import { Product } from '../product/product.model';
+import { CUSTOMIZATION_TYPE } from '../product/product.constants';
 import { Order } from './order.model';
 import {
   ORDER_STATUS,
@@ -94,12 +95,16 @@ const createOrderIntoDB = async (
                 optionLabel: dbOpt.label,
               });
             }
-          } else if (selected.quantity && dbCust.pricePerUnit) {
-            const totalPrice = selected.quantity * dbCust.pricePerUnit;
+          } else if (dbCust.type === CUSTOMIZATION_TYPE.QUANTITY) {
+            const quantity =
+              selected.quantity !== undefined ? selected.quantity : 1;
+            const pricePerUnit = dbCust.pricePerUnit || 0;
+            const totalPrice = quantity * pricePerUnit;
             unitFinalPrice += totalPrice;
             processedCustomizations.push({
               ...selected,
-              pricePerUnit: dbCust.pricePerUnit,
+              quantity,
+              pricePerUnit,
               totalPrice,
             });
           }

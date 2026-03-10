@@ -3,6 +3,7 @@ import ApiError from '../../../errors/ApiError';
 import { ICart, ICartItem, ISelectedCustomization } from './cart.interface';
 import { Cart } from './cart.model';
 import { Product } from '../product/product.model';
+import { CUSTOMIZATION_TYPE } from '../product/product.constants';
 
 const getCartFromDB = async (userId: string) => {
   const result = await Cart.findOne({ user: userId }).populate(
@@ -56,40 +57,41 @@ const addToCartIntoDB = async (
     );
 
     if (customization) {
-      // Handle array of option IDs (multi-select)
-      const optionsToProcess =
-        selected.optionIds || (selected.optionId ? [selected.optionId] : []);
-
-      if (optionsToProcess.length > 0 && customization.options) {
-        for (const optId of optionsToProcess) {
-          const option = customization.options.find(
-            (o: any) => o._id?.toString() === optId,
-          );
-          if (option) {
-            processedCustomizations.push({
-              customizationId: (customization as any)._id,
-              name: customization.name,
-              optionId: (option as any)._id,
-              optionLabel: option.label,
-              optionPrice: option.price,
-            });
-            unitFinalPrice += option.price;
-          }
-        }
-      }
-
-      // Handle quantity type
-      if (selected.quantity && customization.pricePerUnit) {
-        const totalPriceForCust =
-          selected.quantity * customization.pricePerUnit;
+      if (customization.type === CUSTOMIZATION_TYPE.QUANTITY) {
+        const quantity =
+          selected.quantity !== undefined ? selected.quantity : 1;
+        const pricePerUnit = customization.pricePerUnit || 0;
+        const totalPriceForCust = quantity * pricePerUnit;
         processedCustomizations.push({
           customizationId: (customization as any)._id,
           name: customization.name,
-          quantity: selected.quantity,
-          pricePerUnit: customization.pricePerUnit,
+          quantity: quantity,
+          pricePerUnit,
           totalPrice: totalPriceForCust,
         });
         unitFinalPrice += totalPriceForCust;
+      } else {
+        // Handle array of option IDs (multi-select/single-select)
+        const optionsToProcess =
+          selected.optionIds || (selected.optionId ? [selected.optionId] : []);
+
+        if (optionsToProcess.length > 0 && customization.options) {
+          for (const optId of optionsToProcess) {
+            const option = customization.options.find(
+              (o: any) => o._id?.toString() === optId,
+            );
+            if (option) {
+              processedCustomizations.push({
+                customizationId: (customization as any)._id,
+                name: customization.name,
+                optionId: (option as any)._id,
+                optionLabel: option.label,
+                optionPrice: option.price,
+              });
+              unitFinalPrice += option.price;
+            }
+          }
+        }
       }
     }
   }
