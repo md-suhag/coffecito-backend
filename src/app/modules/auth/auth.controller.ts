@@ -80,6 +80,19 @@ const resendVerificationEmail = catchAsync(
   },
 );
 
+const resendVerificationPhone = catchAsync(
+  async (req: Request, res: Response) => {
+    const { phone } = req.body;
+    const result = await AuthService.resendVerificationPhoneOtpToDB(phone);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'OTP Generate and send successfull',
+      data: result,
+    });
+  },
+);
 export const AuthController = {
   verifyEmail,
   loginUser,
@@ -87,4 +100,5 @@ export const AuthController = {
   resetPassword,
   changePassword,
   resendVerificationEmail,
+  resendVerificationPhone,
 };

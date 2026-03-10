@@ -17,6 +17,8 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { USER_STATUS } from '../user/user.constant';
+import { smsTemplate } from '../../../shared/smsTemplate';
+import { smsHelper } from '../../../helpers/smsHelper';
 
 //------------------ login service ------------------
 const loginUserFromDB = async (payload: ILoginData) => {
@@ -220,6 +222,37 @@ const resendVerificationEmailToDB = async (email: string) => {
   );
 };
 
+const resendVerificationPhoneOtpToDB = async (phone: string) => {
+  const existingUser = await User.findOne({ phone: phone }).lean();
+
+  if (!existingUser) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'User with this phone does not exist!',
+    );
+  }
+
+  // Generate OTP and prepare email
+  const otp = generateOTP();
+  const loginOTPTemplate = smsTemplate.sendOtpToPhone({
+    otp: otp,
+    phone: existingUser.phone!,
+  });
+
+  await smsHelper.sendSMS(loginOTPTemplate);
+  // Update user with authentication details
+  const authentication = {
+    oneTimeCode: otp,
+    expireAt: new Date(Date.now() + 3 * 60000),
+  };
+
+  await User.findOneAndUpdate(
+    { phone: phone },
+    { $set: { authentication } },
+    { new: true },
+  );
+};
+
 //forget password
 const resetPasswordToDB = async (
   token: string,
@@ -329,4 +362,5 @@ export const AuthService = {
   resetPasswordToDB,
   changePasswordToDB,
   resendVerificationEmailToDB,
+  resendVerificationPhoneOtpToDB,
 };

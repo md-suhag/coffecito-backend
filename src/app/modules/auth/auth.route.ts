@@ -30,6 +30,12 @@ router.post(
 );
 
 router.post(
+  '/resend-phone-otp',
+  validateRequest(AuthValidation.resendPhoneOtpZodSchema),
+  AuthController.resendVerificationPhone,
+);
+
+router.post(
   '/reset-password',
   validateRequest(AuthValidation.createResetPasswordZodSchema),
   AuthController.resetPassword,

@@ -41,6 +41,16 @@ const resendEmailOtpZodSchema = z.object({
   }),
 });
 
+const resendPhoneOtpZodSchema = z.object({
+  body: z.object({
+    phone: z
+      .string({ message: 'Phone is required' })
+      .nonempty('Phone cannot be empty')
+      .min(8, 'Phone must be at least 8 characters long')
+      .max(15, 'Phone must be at most 15 characters long'),
+  }),
+});
+
 const createResetPasswordZodSchema = z.object({
   body: z.object({
     newPassword: z
@@ -81,4 +91,5 @@ export const AuthValidation = {
   createResetPasswordZodSchema,
   createChangePasswordZodSchema,
   resendEmailOtpZodSchema,
+  resendPhoneOtpZodSchema,
 };
