@@ -58,8 +58,11 @@ export type IOrder = {
   pickupTime?: Date;
 
   pointsEarned: number;
+  loyaltyPointsUsed?: number;
 
   statusLogs: IOrderStatusLog[];
+
+  paymentId?: string;
 
   createdAt?: Date;
   updatedAt?: Date;

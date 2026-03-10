@@ -164,6 +164,14 @@ const orderSchema = new Schema<IOrder, OrderModel>(
       type: Number,
       default: 0,
     },
+    loyaltyPointsUsed: {
+      type: Number,
+      default: 0,
+    },
+    paymentId: {
+      type: String,
+      index: true,
+    },
 
     statusLogs: [
       {

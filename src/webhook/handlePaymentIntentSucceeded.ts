@@ -17,12 +17,20 @@ import {
   GIFT_CARD_TRANSACTION_TYPE,
 } from '../app/modules/giftCardTransaction/giftCardTransaction.constants';
 import { emailTemplate } from '../shared/emailTemplate';
+import stripe from '../config/stripe';
+import { Order } from '../app/modules/order/order.model';
+import { Cart } from '../app/modules/cart/cart.model';
+import {
+  PAYMENT_STATUS,
+  ORDER_STATUS,
+} from '../app/modules/order/order.constants';
+import { Payment } from '../app/modules/payment/payment.model';
 
 export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
   const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
   if (
-    !['wallet_topup', 'gift_card'].includes(
+    !['wallet_topup', 'gift_card', 'order_payment'].includes(
       paymentIntent.metadata?.type as string,
     )
   )
@@ -96,6 +104,68 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
           await emailHelper.sendEmail(template);
         }
       }
+    } else if (paymentIntent.metadata?.type === 'order_payment') {
+      const orderIds = JSON.parse(paymentIntent.metadata?.orderIds || '[]');
+      const storeBreakdown = JSON.parse(
+        paymentIntent.metadata?.storeBreakdown || '[]',
+      );
+
+      // 1. Update Orders
+      await Order.updateMany(
+        { _id: { $in: orderIds } },
+        {
+          paymentStatus: PAYMENT_STATUS.PAID,
+          orderStatus: ORDER_STATUS.PENDING,
+          paymentId: paymentIntent.id,
+        },
+        { session },
+      );
+
+      // 2. Log Payments & Transer funds to stores (Connect)
+      for (const item of storeBreakdown) {
+        // Find the specific order for this store to link in Payment model
+        const relatedOrder = await Order.findOne({
+          _id: { $in: orderIds },
+          store: item.storeId,
+        }).session(session);
+
+        if (relatedOrder) {
+          await Payment.create(
+            [
+              {
+                order: relatedOrder._id,
+                status: 'COMPLETED',
+                amount: item.amount,
+                eventId: event.id,
+                paymentGatewayData: paymentIntent,
+              },
+            ],
+            { session },
+          );
+        }
+
+        if (item.stripeAccountId && item.amount > 0) {
+          try {
+            await stripe.transfers.create({
+              amount: Math.round(item.amount * 100), // Transfer 100% to store
+              currency: 'usd',
+              destination: item.stripeAccountId,
+              metadata: {
+                paymentIntentId: paymentIntent.id,
+                storeId: item.storeId,
+              },
+            });
+          } catch (transferError) {
+            console.error(
+              `Failed to transfer to store ${item.storeId}:`,
+              transferError,
+            );
+          }
+        }
+      }
+
+      // 3. Clear Cart
+      await Cart.deleteOne({ user: userId }).session(session);
     }
   });
 };

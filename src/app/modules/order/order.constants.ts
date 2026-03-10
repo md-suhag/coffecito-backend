@@ -19,3 +19,5 @@ export enum ORDER_STATUS {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
+
+export const LOYALTY_POINTS_PER_DOLLAR = 10;
