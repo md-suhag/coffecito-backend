@@ -3,11 +3,12 @@ import { GiftCard } from './giftCard.model';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import mongoose from 'mongoose';
-import { generateUniqueCardNumber } from '../../../util/generateGiftcardNumber';
+
 import { Customer } from '../customer/customer.model';
 import { GIFT_CARD_STATUS } from './giftCard.constants';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
+import { generateUniqueCardNumber } from '../../../util/generateGiftCardNumber';
 const createGiftCard = async (payload: any, user: JwtPayload) => {
   const { amount, receiverEmail, receiverName, message } = payload;
 
@@ -129,8 +130,29 @@ const getMyGiftCardsDataFromDB = async (user: JwtPayload) => {
   };
 };
 
+const getAllAvailableGiftCardsFromDB = async (user: JwtPayload) => {
+  const customer = await Customer.findOne({ user: user.id });
+  if (!customer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
+  }
+  const giftCards = await GiftCard.find({
+    _id: { $in: customer.giftCards },
+    status: GIFT_CARD_STATUS.ACTIVE,
+    currentBalance: { $gt: 0 },
+  }).select('currentBalance');
+
+  return {
+    giftCards,
+    totalBalance: giftCards.reduce(
+      (acc, giftCard) => acc + giftCard.currentBalance,
+      0,
+    ),
+  };
+};
+
 export const GiftCardServices = {
   createGiftCard,
   addGiftCard,
   getMyGiftCardsDataFromDB,
+  getAllAvailableGiftCardsFromDB,
 };

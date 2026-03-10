@@ -27,4 +27,10 @@ router.get(
   GiftCardController.getMyGiftCardsData,
 );
 
+router.get(
+  '/all-available-giftcards',
+  auth(USER_ROLES.CUSTOMER),
+  GiftCardController.getAllAvailableGiftCards,
+);
+
 export const giftCardRoutes = router;

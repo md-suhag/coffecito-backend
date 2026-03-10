@@ -116,8 +116,23 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
+const getMyLoyaltyPointsFromDB = async (id: string) => {
+  const isExistUser = await User.findById(id).populate(
+    'customer',
+    'loyaltyPoints',
+  );
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  return {
+    loyaltyPoints: (isExistUser as any)?.customer?.loyaltyPoints || 0,
+  };
+};
+
 export const UserService = {
   createUserToDB,
   getSingleUserFromDB,
   updateProfileToDB,
+  getMyLoyaltyPointsFromDB,
 };

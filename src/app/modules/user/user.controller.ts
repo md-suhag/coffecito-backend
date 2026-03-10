@@ -56,4 +56,20 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const UserController = { createUser, getUserProfile, updateProfile };
+const getMyLoyaltyPoints = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.getMyLoyaltyPointsFromDB(req.user.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Loyalty points retrieved successfully',
+    data: result,
+  });
+});
+
+export const UserController = {
+  createUser,
+  getUserProfile,
+  updateProfile,
+  getMyLoyaltyPoints,
+};

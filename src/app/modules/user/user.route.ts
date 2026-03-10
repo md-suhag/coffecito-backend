@@ -4,6 +4,7 @@ import validateRequest from '../../middlewares/validateRequest';
 import { UserController } from './user.controller';
 import { UserValidation } from './user.validation';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
+import { USER_ROLES } from './user.constant';
 const router = express.Router();
 
 // create user
@@ -24,5 +25,11 @@ router.patch(
 
 // get profile
 router.get('/profile', auth(), UserController.getUserProfile);
+
+router.get(
+  '/loyalty-points',
+  auth(USER_ROLES.CUSTOMER),
+  UserController.getMyLoyaltyPoints,
+);
 
 export const UserRoutes = router;

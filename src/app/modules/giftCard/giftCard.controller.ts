@@ -3,6 +3,7 @@ import { GiftCardServices } from './giftCard.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createGiftCard = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -46,8 +47,24 @@ const getMyGiftCardsData = catchAsync(
   },
 );
 
+const getAllAvailableGiftCards = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await GiftCardServices.getAllAvailableGiftCardsFromDB(
+      req.user as JwtPayload,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Gift cards fetched successfully',
+      data: result,
+    });
+  },
+);
+
 export const GiftCardController = {
   createGiftCard,
   addGiftCard,
   getMyGiftCardsData,
+  getAllAvailableGiftCards,
 };
