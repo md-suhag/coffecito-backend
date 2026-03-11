@@ -7,6 +7,13 @@ import { OrderController } from './order.controller';
 
 const router = express.Router();
 
+router.get('/upcoming', auth(USER_ROLES.CUSTOMER), OrderController.getMyUpcomingOrders);
+router.get(
+  '/completed',
+  auth(USER_ROLES.CUSTOMER),
+  OrderController.getMyCompletedOrders,
+);
+
 router.post(
   '/',
   auth(USER_ROLES.CUSTOMER),

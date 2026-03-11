@@ -1,3 +1,4 @@
+import QueryBuilder from '../../builder/QueryBuilder';
 import { IOrder } from './order.interface';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
@@ -378,6 +379,99 @@ const createOrderIntoDB = async (
   }
 };
 
+const getMyUpcomingOrdersFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const customer = await Customer.findOne({ user: userId });
+
+  if (!customer) {
+    throw new ApiError(404, 'Customer profile not found');
+  }
+
+  const orderQuery = new QueryBuilder(
+    Order.find({
+      customer: customer._id,
+      orderStatus: {
+        $in: ['pending', 'processing', 'ready'],
+      },
+    })
+      .select('orderId items totalAmount orderStatus')
+      .populate('items.product', 'name image readyTime'),
+    query,
+  )
+    .sort()
+    .paginate();
+
+  const [orders, meta] = await Promise.all([
+    orderQuery.modelQuery,
+    orderQuery.getPaginationInfo(),
+  ]);
+
+  const formattedOrders = orders.map(order => {
+    const totalItems = order.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+
+    const productNames = order.items.map(i => i.productName);
+
+    const readyTime = Math.max(
+      ...order.items.map(i => (i.product as any)?.readyTime || 0),
+    );
+
+    return {
+      _id: order._id,
+      orderId: order.orderId,
+      orderStatus: order.orderStatus,
+      totalItems,
+      orderTotal: order.totalAmount,
+      productNames,
+      readyTime,
+      previewImage: (order.items[0]?.product as any)?.image,
+    };
+  });
+
+  return {
+    orders: formattedOrders,
+    meta,
+  };
+};
+
+const getMyCompletedOrdersFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const customer = await Customer.findOne({ user: userId });
+  if (!customer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
+  }
+
+  const completedOrderQuery = new QueryBuilder(
+    Order.find({
+      customer: customer._id,
+      orderStatus: {
+        $in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
+      },
+    }).populate('store', 'name image address'),
+    query,
+  )
+    .sort()
+    .paginate();
+
+  const [orders, meta] = await Promise.all([
+    completedOrderQuery.modelQuery,
+    completedOrderQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    orders,
+    meta,
+  };
+};
+
 export const OrderServices = {
   createOrderIntoDB,
+  getMyUpcomingOrdersFromDB,
+  getMyCompletedOrdersFromDB,
 };

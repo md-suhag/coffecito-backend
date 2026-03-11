@@ -15,6 +15,38 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyUpcomingOrders = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.getMyUpcomingOrdersFromDB(
+    req.user.id,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Upcoming orders fetched successfully',
+    data: result.orders,
+    pagination: result.meta,
+  });
+});
+
+const getMyCompletedOrders = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.getMyCompletedOrdersFromDB(
+    req.user.id,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Completed orders fetched successfully',
+    data: result.orders,
+    pagination: result.meta,
+  });
+});
+
 export const OrderController = {
   createOrder,
+  getMyUpcomingOrders,
+  getMyCompletedOrders,
 };
