@@ -9,8 +9,12 @@ import { emailHelper } from '../../../helpers/emailHelper';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { User } from '../user/user.model';
 import { USER_ROLES } from '../user/user.constant';
-import { USER_SEARCHABLE_FIELDS } from './admin.constants';
+import {
+  EMAIL_SUBSCRIBER_SEARCHABLE_FIELDS,
+  USER_SEARCHABLE_FIELDS,
+} from './admin.constants';
 import { IUser } from '../user/user.interface';
+import { EmailSubscription } from '../emailSubscription/emailSubscription.model';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -70,10 +74,28 @@ const updateCustomer = async (id: string, payload: Partial<IUser>) => {
   return result;
 };
 
+const getAllSubscribers = async (query: Record<string, any>) => {
+  const subscribersQuery = new QueryBuilder(EmailSubscription.find(), query)
+    .sort()
+    .paginate()
+    .search(EMAIL_SUBSCRIBER_SEARCHABLE_FIELDS);
+
+  const [subscribers, meta] = await Promise.all([
+    subscribersQuery.modelQuery,
+    subscribersQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    subscribers,
+    meta,
+  };
+};
+
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
   contactUs,
   getAllCustomers,
   updateCustomer,
+  getAllSubscribers,
 };

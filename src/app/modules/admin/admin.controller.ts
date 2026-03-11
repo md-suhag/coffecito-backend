@@ -62,10 +62,23 @@ const updateCustomer = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllSubscribers = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getAllSubscribers(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Subscribers fetched successfully',
+    data: result.subscribers,
+    pagination: result.meta,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
   contactUs,
   getAllCustomers,
   updateCustomer,
+  getAllSubscribers,
 };

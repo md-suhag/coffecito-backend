@@ -40,4 +40,10 @@ router.patch(
   AdminController.updateCustomer,
 );
 
+router.get(
+  '/subscribers',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getAllSubscribers,
+);
+
 export const adminRoutes = router;
