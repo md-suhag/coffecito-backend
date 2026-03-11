@@ -32,4 +32,11 @@ router.get(
   UserController.getMyLoyaltyPoints,
 );
 
+router.delete(
+  '/:id',
+  auth(USER_ROLES.CUSTOMER),
+  validateRequest(UserValidation.deleteMyAccountZodSchema),
+  UserController.deleteMyAccount,
+);
+
 export const UserRoutes = router;

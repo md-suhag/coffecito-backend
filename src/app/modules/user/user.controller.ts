@@ -67,9 +67,23 @@ const getMyLoyaltyPoints = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteMyAccount = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.deleteMyAccountFromDB(
+    req.user.id,
+    req.body.password,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Account deleted successfully',
+    data: result,
+  });
+});
 export const UserController = {
   createUser,
   getUserProfile,
   updateProfile,
   getMyLoyaltyPoints,
+  deleteMyAccount,
 };

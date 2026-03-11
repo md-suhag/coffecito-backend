@@ -162,9 +162,37 @@ const getMyLoyaltyPointsFromDB = async (id: string) => {
   };
 };
 
+const deleteMyAccountFromDB = async (id: string, password: string) => {
+  const isExistUser = await User.findById(id).select('+password');
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  if (!(await User.isMatchPassword(password, isExistUser?.password || ''))) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid Password');
+  }
+
+  const updateDoc = await User.findOneAndUpdate(
+    { _id: id },
+    {
+      isDeleted: true,
+      email: `deleted_${Date.now()}_${isExistUser.email}`,
+    },
+  );
+
+  if (!updateDoc) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to delete user');
+  }
+
+  return {
+    message: 'Account deleted successfully',
+  };
+};
+
 export const UserService = {
   createUserToDB,
   getSingleUserFromDB,
   updateProfileToDB,
   getMyLoyaltyPointsFromDB,
+  deleteMyAccountFromDB,
 };

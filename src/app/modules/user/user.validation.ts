@@ -50,7 +50,16 @@ const updateUserZodSchema = z.object({
       },
     ),
 });
+
+const deleteMyAccountZodSchema = z.object({
+  body: z
+    .object({
+      password: z.string({ required_error: 'Password is required' }),
+    })
+    .strict(),
+});
 export const UserValidation = {
   createUserZodSchema,
   updateUserZodSchema,
+  deleteMyAccountZodSchema,
 };
