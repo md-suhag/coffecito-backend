@@ -26,5 +26,10 @@ router.get(
   auth(USER_ROLES.CUSTOMER),
   FavoriteController.getMyFavoriteProducts,
 );
+router.get(
+  '/stores',
+  auth(USER_ROLES.CUSTOMER),
+  FavoriteController.getMyFavoriteStores,
+);
 
 export const favoriteRoutes = router;

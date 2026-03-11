@@ -80,8 +80,33 @@ const getMyFavoriteProducts = async (
     meta,
   };
 };
+const getMyFavoriteStores = async (
+  userId: string,
+  query: Record<string, any>,
+) => {
+  const favoriteStoresQuery = new QueryBuilder(
+    Favorite.find({ user: userId, store: { $exists: true } }).populate(
+      'store',
+      'name image address  hours ',
+    ),
+    query,
+  )
+    .sort()
+    .paginate();
+
+  const [favoriteStores, meta] = await Promise.all([
+    favoriteStoresQuery.modelQuery,
+    favoriteStoresQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    favoriteStores,
+    meta,
+  };
+};
 export const FavoriteServices = {
   addFavorite,
   removeFavorite,
   getMyFavoriteProducts,
+  getMyFavoriteStores,
 };

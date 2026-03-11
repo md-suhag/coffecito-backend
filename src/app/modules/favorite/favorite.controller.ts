@@ -45,9 +45,26 @@ const getMyFavoriteProducts = catchAsync(
     });
   },
 );
+const getMyFavoriteStores = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await FavoriteServices.getMyFavoriteStores(
+      req.user.id,
+      req.query,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Favorite stores retrieved Successfully',
+      data: result.favoriteStores,
+      pagination: result.meta,
+    });
+  },
+);
 
 export const FavoriteController = {
   addFavorite,
   removeFavorite,
   getMyFavoriteProducts,
+  getMyFavoriteStores,
 };
