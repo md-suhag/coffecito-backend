@@ -1,0 +1,1 @@
+export const EMAIL_SUBSCRIPTION_CONSTANT = 'someValue';
