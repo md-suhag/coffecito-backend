@@ -36,6 +36,7 @@ const getAllStoresFromDB = async (query: Record<string, unknown>) => {
 
 const getAllStoresForCustomerFromDB = async (
   query: Record<string, unknown>,
+  userId?: string,
 ) => {
   const { longitude, latitude, radius, ...restQuery } = query;
   let modelQuery = Store.find({
@@ -67,8 +68,27 @@ const getAllStoresForCustomerFromDB = async (
     storesQuery.getPaginationInfo(),
   ]);
 
+  let storesWithFavorite = stores.map((store) => ({
+    ...store.toObject(),
+    isFavorite: false,
+  }));
+
+  if (userId) {
+    const favoriteStoreIds = await Favorite.find({
+      user: userId,
+      store: { $in: stores.map((s) => s._id) },
+    }).distinct('store');
+
+    const favoriteSet = new Set(favoriteStoreIds.map((id) => id.toString()));
+
+    storesWithFavorite = storesWithFavorite.map((store) => ({
+      ...store,
+      isFavorite: favoriteSet.has(store._id.toString()),
+    }));
+  }
+
   return {
-    stores,
+    stores: storesWithFavorite,
     meta,
   };
 };

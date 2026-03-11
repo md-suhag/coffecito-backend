@@ -77,7 +77,11 @@ const getAllStores = catchAsync(async (req: Request, res: Response) => {
 
 const getAllStoresForCustomer = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await StoreServices.getAllStoresForCustomerFromDB(req.query);
+    const userId = (req.user as any)?.id;
+    const result = await StoreServices.getAllStoresForCustomerFromDB(
+      req.query,
+      userId,
+    );
 
     sendResponse(res, {
       statusCode: StatusCodes.OK,

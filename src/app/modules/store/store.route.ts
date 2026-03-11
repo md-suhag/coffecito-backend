@@ -10,7 +10,7 @@ import authOptional from '../../middlewares/authOptional';
 
 const router = express.Router();
 
-router.get('/', StoreController.getAllStoresForCustomer);
+router.get('/', authOptional(), StoreController.getAllStoresForCustomer);
 
 router.get(
   '/:id/products',
