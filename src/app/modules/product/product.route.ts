@@ -6,6 +6,8 @@ import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../user/user.constant';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
 
+import authOptional from '../../middlewares/authOptional';
+
 const router = express.Router();
 
 router.post(
@@ -36,6 +38,6 @@ router.delete(
   ProductController.deleteProduct,
 );
 
-router.get('/:id', ProductController.getProductById);
+router.get('/:id', authOptional(), ProductController.getProductById);
 
 export const productRoutes = router;

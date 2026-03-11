@@ -3,6 +3,8 @@ import { PRODUCT_SEARCHABLE_FIELDS } from './product.constants';
 import { IProduct } from './product.interface';
 import { Product } from './product.model';
 
+import { Favorite } from '../favorite/favorite.model';
+
 const createProductIntoDB = async (payload: IProduct) => {
   const result = await Product.create(payload);
   return result;
@@ -48,9 +50,26 @@ const deleteProductFromDB = async (id: string) => {
   return result;
 };
 
-const getProductByIdFromDB = async (id: string) => {
+const getProductByIdFromDB = async (id: string, userId?: string) => {
   const result = await Product.findById(id).lean();
-  return result;
+
+  if (!result) {
+    return null;
+  }
+
+  let isFavorite = false;
+  if (userId) {
+    const favorite = await Favorite.findOne({
+      user: userId,
+      product: id,
+    });
+    isFavorite = !!favorite;
+  }
+
+  return {
+    ...result,
+    isFavorite,
+  };
 };
 
 export const ProductServices = {

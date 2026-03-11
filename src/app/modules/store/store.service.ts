@@ -9,6 +9,7 @@ import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Product } from '../product/product.model';
 import { PRODUCT_SEARCHABLE_FIELDS } from '../product/product.constants';
+import { Favorite } from '../favorite/favorite.model';
 
 const createStoreIntoDB = async (payload: IStore) => {
   const result = await Store.create(payload);
@@ -146,6 +147,7 @@ const connectStripeIntoDB = async (id: string) => {
 const getAllProductsOfAStoreFromDB = async (
   id: string,
   query: Record<string, unknown>,
+  userId?: string,
 ) => {
   const productsQuery = new QueryBuilder(
     Product.find({ store: id }).select(
@@ -163,8 +165,27 @@ const getAllProductsOfAStoreFromDB = async (
     productsQuery.getPaginationInfo(),
   ]);
 
+  let productsWithFavorite = products.map(product => ({
+    ...product.toObject(),
+    isFavorite: false,
+  }));
+
+  if (userId) {
+    const favoriteProductIds = await Favorite.find({
+      user: userId,
+      product: { $in: products.map(p => p._id) },
+    }).distinct('product');
+
+    const favoriteSet = new Set(favoriteProductIds.map(id => id.toString()));
+
+    productsWithFavorite = productsWithFavorite.map(product => ({
+      ...product,
+      isFavorite: favoriteSet.has(product._id.toString()),
+    }));
+  }
+
   return {
-    products,
+    products: productsWithFavorite,
     meta,
   };
 };

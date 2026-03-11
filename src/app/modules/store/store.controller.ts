@@ -104,9 +104,11 @@ const connectStripe = catchAsync(async (req: Request, res: Response) => {
 const getAllProductsOfAStore = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    const userId = (req.user as any)?.id;
     const result = await StoreServices.getAllProductsOfAStoreFromDB(
       id,
       req.query,
+      userId,
     );
 
     sendResponse(res, {

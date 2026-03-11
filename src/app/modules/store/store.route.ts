@@ -6,10 +6,16 @@ import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../user/user.constant';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
 
+import authOptional from '../../middlewares/authOptional';
+
 const router = express.Router();
 
 router.get('/', StoreController.getAllStoresForCustomer);
 
-router.get('/:id/products', StoreController.getAllProductsOfAStore);
+router.get(
+  '/:id/products',
+  authOptional(),
+  StoreController.getAllProductsOfAStore,
+);
 
 export const storeRoutes = router;

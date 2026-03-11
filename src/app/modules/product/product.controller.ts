@@ -65,7 +65,8 @@ const deleteProduct = catchAsync(async (req: Request, res: Response) => {
 
 const getProductById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await ProductServices.getProductByIdFromDB(id);
+  const userId = (req.user as any)?.id;
+  const result = await ProductServices.getProductByIdFromDB(id, userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
