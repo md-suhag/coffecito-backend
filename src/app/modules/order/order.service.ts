@@ -229,6 +229,12 @@ const createOrderIntoDB = async (
       wallet.balance -= totalCartAmount;
       await wallet.save({ session: dbSession });
 
+      const firstItem = cart.items[0];
+      const title =
+        cart.items.length > 1
+          ? `${firstItem.productName} & ${cart.items.length - 1} more`
+          : firstItem.productName;
+
       const walletTx = await WalletTransaction.create(
         [
           {
@@ -238,6 +244,8 @@ const createOrderIntoDB = async (
             amount: totalCartAmount,
             balanceAfter: wallet.balance,
             status: WALLET_TRANSACTION_STATUS.SUCCESS,
+            title,
+            relatedOrder: orderIds[0], // Linking to the first order ID (multi-store orders share one payment/transaction record in this context usually)
           },
         ],
         { session: dbSession },

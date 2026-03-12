@@ -58,6 +58,7 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
             status: WALLET_TRANSACTION_STATUS.SUCCESS,
             balanceAfter: wallet.balance,
             wallet: wallet._id,
+            title: 'Add Money',
           },
         ],
         { session },

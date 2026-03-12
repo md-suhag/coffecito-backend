@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import stripe from '../config/stripe';
 import config from '../config';
 import Stripe from 'stripe';
-import { handleCheckoutSessionCompleted } from './handleCheckoutSessionCompleted';
+// import { handleCheckoutSessionCompleted } from './handleCheckoutSessionCompleted';
 import { handleCheckoutSessionExpired } from './handleCheckoutSessionExpired';
 import { StripeEvent } from '../app/modules/stripeEvent/stripeEvent.model';
 import { handlePaymentIntentSucceeded } from './handlePaymentIntentSucceeded';

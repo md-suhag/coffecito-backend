@@ -10,8 +10,13 @@ export type IWalletTransaction = {
   type: WALLET_TRANSACTION_TYPE;
   amount: number;
   balanceAfter: number;
-  paymentGatewayData: Record<string, any>;
+  paymentGatewayData?: Record<string, any>;
   status: WALLET_TRANSACTION_STATUS;
+  title: string;
+  remark?: string;
+  relatedOrder?: Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type WalletTransactionModel = Model<IWalletTransaction>;

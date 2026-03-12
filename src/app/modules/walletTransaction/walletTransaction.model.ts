@@ -44,6 +44,17 @@ const walletTransactionSchema = new Schema<
       enum: WALLET_TRANSACTION_STATUS,
       default: WALLET_TRANSACTION_STATUS.PENDING,
     },
+    title: {
+      type: String,
+      required: true,
+    },
+    remark: {
+      type: String,
+    },
+    relatedOrder: {
+      type: Schema.Types.ObjectId,
+      ref: 'Order',
+    },
   },
   {
     timestamps: true,
