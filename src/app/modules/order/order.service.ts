@@ -31,6 +31,8 @@ import {
 } from '../giftCardTransaction/giftCardTransaction.constants';
 import { GIFT_CARD_STATUS } from '../giftCard/giftCard.constants';
 import { Payment } from '../payment/payment.model';
+import { User } from '../user/user.model';
+import { calculateDistanceKm } from '../../../util/calculateDistance';
 
 const createOrderIntoDB = async (
   userId: string,
@@ -484,18 +486,77 @@ const getMyCompletedOrdersFromDB = async (
 };
 
 const getMyOrderDetailsFromDB = async (userId: string, orderId: string) => {
+  const user = await User.findById(userId).select('location');
+
   const order = await Order.findOne({
     _id: orderId,
     customer: userId,
   })
     .populate('store', 'name location')
-    .populate('items.product', 'name image readyTime');
+    .populate('items.product', 'image readyTime');
 
   if (!order) {
-    throw new ApiError(404, 'Order not found');
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Order not found');
   }
 
-  return order;
+  let distanceKm: number | null = null;
+
+  if (
+    user?.location?.latitude &&
+    user?.location?.longitude &&
+    (order.store as any)?.location?.coordinates
+  ) {
+    const [storeLng, storeLat] = (order.store as any).location.coordinates;
+
+    distanceKm = calculateDistanceKm(
+      user.location.latitude,
+      user.location.longitude,
+      storeLat,
+      storeLng,
+    );
+  }
+
+  const readyTime = Math.max(
+    ...order.items.map(item => (item.product as any)?.readyTime || 0),
+  );
+
+  const items = order.items.map(item => ({
+    _id: item.product?._id,
+    productName: item.productName,
+    image: (item.product as any)?.image,
+    quantity: item.quantity,
+    unitPrice: item.unitFinalPrice,
+    totalPrice: item.itemTotalPrice,
+  }));
+
+  return {
+    _id: order._id,
+    orderId: order.orderId,
+    orderStatus: order.orderStatus,
+    createdAt: order.createdAt,
+
+    store: {
+      id: order.store?._id,
+      name: (order.store as any)?.name,
+      distanceKm: distanceKm ? Number(distanceKm.toFixed(1)) : null,
+    },
+
+    readyTime,
+
+    subtotal: order.subtotal,
+    taxAmount: order.taxAmount,
+    tipAmount: order.tipAmount,
+    discountAmount: order.discountAmount,
+    totalAmount: order.totalAmount,
+
+    paymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus,
+
+    pointsEarned: order.pointsEarned,
+    loyaltyPointsUsed: order.loyaltyPointsUsed,
+
+    items,
+  };
 };
 export const OrderServices = {
   createOrderIntoDB,
