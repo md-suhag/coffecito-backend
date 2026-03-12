@@ -38,8 +38,20 @@ const markAllAsRead = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const sendNotification = catchAsync(async (req: Request, res: Response) => {
+  const result = await NotificationServices.sendBulkNotification(req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Notifications sent successfully',
+    data: result,
+  });
+});
+
 export const NotificationController = {
   getMyNotifications,
   markAsRead,
   markAllAsRead,
+  sendNotification,
 };

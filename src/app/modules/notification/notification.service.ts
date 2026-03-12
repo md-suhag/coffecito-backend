@@ -2,6 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Notification } from './notification.model';
+import { NotificationHelper } from '../../../helpers/notificationHelper';
+import { NOTIFICATION_TYPE } from './notification.interface';
 
 const getMyNotificationsFromDB = async (userId: string, query: Record<string, unknown>) => {
   const notificationQuery = new QueryBuilder(
@@ -41,8 +43,19 @@ const markAllAsReadIntoDB = async (userId: string) => {
   );
 };
 
+const sendBulkNotification = async (payload: {
+  receivers?: string[];
+  title: string;
+  message: string;
+  type: NOTIFICATION_TYPE;
+  data?: Record<string, any>;
+}) => {
+  return await NotificationHelper.sendAndSaveBulkNotification(payload);
+};
+
 export const NotificationServices = {
   getMyNotificationsFromDB,
   markAsReadIntoDB,
   markAllAsReadIntoDB,
+  sendBulkNotification,
 };
