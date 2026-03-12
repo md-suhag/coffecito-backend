@@ -82,6 +82,7 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
         await GiftCardTransaction.create(
           [
             {
+              user: userId,
               giftCard: giftCard._id,
               type: GIFT_CARD_TRANSACTION_TYPE.PURCHASE,
               amount: amount,
