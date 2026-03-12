@@ -50,6 +50,59 @@ const getSummaryCardsData = async () => {
   };
 };
 
+const getRevenueByMonth = async (year?: number) => {
+  const selectedYear = year || new Date().getFullYear();
+
+  const revenueData = await Order.aggregate([
+    {
+      $match: {
+        status: ORDER_STATUS.COMPLETED,
+        paymentStatus: PAYMENT_STATUS.PAID,
+        createdAt: {
+          $gte: new Date(`${selectedYear}-01-01`),
+          $lte: new Date(`${selectedYear}-12-31T23:59:59.999Z`),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { $month: '$createdAt' },
+        revenue: { $sum: '$totalAmount' },
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+  ]);
+
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  const formattedData = monthNames.map((month, index) => {
+    const monthData = revenueData.find(d => d._id === index + 1);
+    return {
+      month,
+      revenue: monthData ? Math.round(monthData.revenue * 100) / 100 : 0,
+      year: selectedYear,
+    };
+  });
+
+  return formattedData;
+};
+
 export const AnalyticsServices = {
   getSummaryCardsData,
+  getRevenueByMonth,
 };

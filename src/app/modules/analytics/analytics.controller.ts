@@ -17,6 +17,22 @@ const getSummaryCardsData = async (
   });
 };
 
+const getRevenueByMonth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const year = req.query.year ? Number(req.query.year) : undefined;
+  const result = await AnalyticsServices.getRevenueByMonth(year);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Gross revenue by month fetched successfully',
+    data: result,
+  });
+};
+
 export const AnalyticsController = {
   getSummaryCardsData,
+  getRevenueByMonth,
 };

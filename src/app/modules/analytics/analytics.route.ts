@@ -11,4 +11,10 @@ router.get(
   AnalyticsController.getSummaryCardsData,
 );
 
+router.get(
+  '/gross-revenue-by-month',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  AnalyticsController.getRevenueByMonth,
+);
+
 export const analyticsRoutes = router;
