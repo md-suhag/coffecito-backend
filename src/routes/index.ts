@@ -1,3 +1,4 @@
+import { analyticsRoutes } from '../app/modules/analytics/analytics.route';
 import { favoriteRoutes } from '../app/modules/favorite/favorite.route';
 import { emailSubscriptionRoutes } from '../app/modules/emailSubscription/emailSubscription.route';
 import { cartRoutes } from '../app/modules/cart/cart.route';
@@ -24,9 +25,6 @@ import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
 const router = express.Router();
 
 const apiRoutes = [
-  
-  
-  
   {
     path: '/users',
     route: UserRoutes,
@@ -73,6 +71,8 @@ const apiRoutes = [
   { path: '/emailSubscriptions', route: emailSubscriptionRoutes },
 
   { path: '/favorites', route: favoriteRoutes },
+
+  { path: '/analytics', route: analyticsRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
