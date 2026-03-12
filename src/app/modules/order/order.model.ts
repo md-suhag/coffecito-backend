@@ -94,7 +94,7 @@ const orderSchema = new Schema<IOrder, OrderModel>(
 
     customer: {
       type: Schema.Types.ObjectId,
-      ref: 'Customer',
+      ref: 'User',
       required: true,
       index: true,
     },

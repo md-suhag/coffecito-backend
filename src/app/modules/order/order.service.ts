@@ -185,7 +185,7 @@ const createOrderIntoDB = async (
 
       const orderData = {
         store: storeData.storeId,
-        customer: customerRecord._id,
+        customer: userId,
         orderId,
         items: storeData.items,
         subtotal: storeData.subtotal,
@@ -383,15 +383,9 @@ const getMyUpcomingOrdersFromDB = async (
   userId: string,
   query: Record<string, unknown>,
 ) => {
-  const customer = await Customer.findOne({ user: userId });
-
-  if (!customer) {
-    throw new ApiError(404, 'Customer profile not found');
-  }
-
   const orderQuery = new QueryBuilder(
     Order.find({
-      customer: customer._id,
+      customer: userId,
       orderStatus: {
         $in: ['pending', 'processing', 'ready'],
       },
@@ -442,14 +436,9 @@ const getMyCompletedOrdersFromDB = async (
   userId: string,
   query: Record<string, unknown>,
 ) => {
-  const customer = await Customer.findOne({ user: userId });
-  if (!customer) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
-  }
-
   const completedOrderQuery = new QueryBuilder(
     Order.find({
-      customer: customer._id,
+      customer: userId,
       orderStatus: {
         $in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
       },
@@ -464,14 +453,53 @@ const getMyCompletedOrdersFromDB = async (
     completedOrderQuery.getPaginationInfo(),
   ]);
 
+  const formattedOrders = orders.map(order => {
+    const totalItems = order.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+
+    const productNames = order.items.map(i => i.productName);
+
+    const readyTime = Math.max(
+      ...order.items.map(i => (i.product as any)?.readyTime || 0),
+    );
+
+    return {
+      _id: order._id,
+      orderId: order.orderId,
+      orderStatus: order.orderStatus,
+      totalItems,
+      orderTotal: order.totalAmount,
+      productNames,
+      readyTime,
+      previewImage: (order.items[0]?.product as any)?.image,
+    };
+  });
+
   return {
-    orders,
+    orders: formattedOrders,
     meta,
   };
 };
 
+const getMyOrderDetailsFromDB = async (userId: string, orderId: string) => {
+  const order = await Order.findOne({
+    _id: orderId,
+    customer: userId,
+  })
+    .populate('store', 'name location')
+    .populate('items.product', 'name image readyTime');
+
+  if (!order) {
+    throw new ApiError(404, 'Order not found');
+  }
+
+  return order;
+};
 export const OrderServices = {
   createOrderIntoDB,
   getMyUpcomingOrdersFromDB,
   getMyCompletedOrdersFromDB,
+  getMyOrderDetailsFromDB,
 };

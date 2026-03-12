@@ -45,8 +45,23 @@ const getMyCompletedOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyOrderDetails = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.getMyOrderDetailsFromDB(
+    req.user.id,
+    req.params.id,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order fetched successfully',
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
   getMyUpcomingOrders,
   getMyCompletedOrders,
+  getMyOrderDetails,
 };
