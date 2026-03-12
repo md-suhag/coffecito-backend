@@ -13,7 +13,6 @@ const promotionsSchema = new Schema<IPromotions, PromotionsModel>(
     },
     url: {
       type: String,
-      required: true,
     },
     isActive: {
       type: Boolean,
