@@ -49,9 +49,22 @@ const sendNotification = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllNotifications = catchAsync(async (req: Request, res: Response) => {
+  const result = await NotificationServices.getAllNotificationsFromDB(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'All notifications fetched successfully',
+    data: result.notifications,
+    pagination: result.meta,
+  });
+});
+
 export const NotificationController = {
   getMyNotifications,
   markAsRead,
   markAllAsRead,
   sendNotification,
+  getAllNotifications,
 };

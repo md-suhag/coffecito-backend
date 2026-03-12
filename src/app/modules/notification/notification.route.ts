@@ -13,6 +13,12 @@ router.get(
   NotificationController.getMyNotifications
 );
 
+router.get(
+  '/all-notifications',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  NotificationController.getAllNotifications
+);
+
 router.post(
   '/send-notification',
   auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),

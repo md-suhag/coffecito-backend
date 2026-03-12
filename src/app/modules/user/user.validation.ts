@@ -32,6 +32,7 @@ const updateUserZodSchema = z.object({
       latitude: z.number().optional(),
       longitude: z.number().optional(),
       isOnboard: z.boolean().optional(),
+      deviceToken: z.string().optional(),
     })
     .strict()
     .refine(

@@ -53,9 +53,29 @@ const sendBulkNotification = async (payload: {
   return await NotificationHelper.sendAndSaveBulkNotification(payload);
 };
 
+const getAllNotificationsFromDB = async (query: Record<string, unknown>) => {
+  const notificationQuery = new QueryBuilder(
+    Notification.find().populate('receiver', 'name email profileImage'),
+    query
+  )
+    .search(['title', 'message'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [notifications, meta] = await Promise.all([
+    notificationQuery.modelQuery,
+    notificationQuery.getPaginationInfo(),
+  ]);
+
+  return { notifications, meta };
+};
+
 export const NotificationServices = {
   getMyNotificationsFromDB,
   markAsReadIntoDB,
   markAllAsReadIntoDB,
   sendBulkNotification,
+  getAllNotificationsFromDB,
 };

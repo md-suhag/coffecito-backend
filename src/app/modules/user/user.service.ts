@@ -111,7 +111,12 @@ const updateProfileToDB = async (
     unlinkFile(isExistUser.profileImage);
   }
 
-  const { isOnboard, ...updatePayload } = payload;
+  const { isOnboard, deviceToken, ...updatePayload } = payload;
+
+  // Only update deviceToken if it's provided and different from existing
+  if (deviceToken && deviceToken !== isExistUser.deviceToken) {
+    (updatePayload as any).deviceToken = deviceToken;
+  }
 
   const updateDoc = await User.findOneAndUpdate({ _id: id }, updatePayload, {
     new: true,
