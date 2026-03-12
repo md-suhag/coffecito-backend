@@ -32,7 +32,23 @@ const getRevenueByMonth = async (
   });
 };
 
+const getOrdersByCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const range = (req.query.range as any) || 'this-week';
+  const result = await AnalyticsServices.getOrdersByCategory(range);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Orders by category fetched successfully',
+    data: result,
+  });
+};
+
 export const AnalyticsController = {
   getSummaryCardsData,
   getRevenueByMonth,
+  getOrdersByCategory,
 };

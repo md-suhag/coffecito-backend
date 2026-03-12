@@ -17,4 +17,10 @@ router.get(
   AnalyticsController.getRevenueByMonth,
 );
 
+router.get(
+  '/orders-by-category',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  AnalyticsController.getOrdersByCategory,
+);
+
 export const analyticsRoutes = router;
