@@ -17,7 +17,7 @@ import {
 import { IUser } from '../user/user.interface';
 import { EmailSubscription } from '../emailSubscription/emailSubscription.model';
 import { Order } from '../order/order.model';
-import { ORDER_STATUS } from '../order/order.constants';
+import { ORDER_STATUS, PAYMENT_STATUS } from '../order/order.constants';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -95,7 +95,12 @@ const getAllSubscribers = async (query: Record<string, any>) => {
 };
 
 const getAllOrdersFromDB = async (query: Record<string, any>) => {
-  const ordersQuery = new QueryBuilder(Order.find(), query)
+  const ordersQuery = new QueryBuilder(
+    Order.find({
+      paymentStatus: PAYMENT_STATUS.PAID,
+    }),
+    query,
+  )
     .sort()
     .paginate()
     .filter()

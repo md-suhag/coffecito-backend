@@ -166,8 +166,21 @@ const getOrdersByCategory = async (
   return formattedData;
 };
 
+const getRecentOrdersFromDB = async () => {
+  const result = await Order.find({
+    paymentStatus: PAYMENT_STATUS.PAID,
+  })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .populate('customer', 'name email phone profileImage')
+    .populate('store', 'name');
+
+  return result;
+};
+
 export const AnalyticsServices = {
   getSummaryCardsData,
   getRevenueByMonth,
   getOrdersByCategory,
+  getRecentOrdersFromDB,
 };

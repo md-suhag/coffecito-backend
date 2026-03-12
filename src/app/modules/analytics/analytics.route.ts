@@ -23,4 +23,10 @@ router.get(
   AnalyticsController.getOrdersByCategory,
 );
 
+router.get(
+  '/recent-orders',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  AnalyticsController.getRecentOrders,
+);
+
 export const analyticsRoutes = router;
