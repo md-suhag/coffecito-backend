@@ -74,6 +74,30 @@ const getAllSubscribers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllOrders = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getAllOrdersFromDB(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Orders fetched successfully',
+    data: result.orders,
+    pagination: result.meta,
+  });
+});
+
+const updateOrder = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AdminServices.updateOrderFromDB(id, req.body.status);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Order updated successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
@@ -81,4 +105,6 @@ export const AdminController = {
   getAllCustomers,
   updateCustomer,
   getAllSubscribers,
+  getAllOrders,
+  updateOrder,
 };

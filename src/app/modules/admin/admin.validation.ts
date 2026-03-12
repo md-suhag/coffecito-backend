@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { USER_STATUS } from '../user/user.constant';
+import { ORDER_STATUS } from '../order/order.constants';
 
 const createCategoryZodSchema = z.object({
   body: z.object({
@@ -42,9 +43,18 @@ const updateCustomerStatusZodSchema = z.object({
     .strict(),
 });
 
+const updateOrderZodSchema = z.object({
+  body: z
+    .object({
+      status: z.nativeEnum(ORDER_STATUS),
+    })
+    .strict(),
+});
+
 export const AdminValidations = {
   createCategoryZodSchema,
   updateCategoryZodSchema,
   contactUsSchema,
   updateCustomerStatusZodSchema,
+  updateOrderZodSchema,
 };

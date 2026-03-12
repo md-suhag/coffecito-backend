@@ -11,10 +11,13 @@ import { User } from '../user/user.model';
 import { USER_ROLES } from '../user/user.constant';
 import {
   EMAIL_SUBSCRIBER_SEARCHABLE_FIELDS,
+  ORDER_SEARCHABLE_FIELDS,
   USER_SEARCHABLE_FIELDS,
 } from './admin.constants';
 import { IUser } from '../user/user.interface';
 import { EmailSubscription } from '../emailSubscription/emailSubscription.model';
+import { Order } from '../order/order.model';
+import { ORDER_STATUS } from '../order/order.constants';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -91,6 +94,46 @@ const getAllSubscribers = async (query: Record<string, any>) => {
   };
 };
 
+const getAllOrdersFromDB = async (query: Record<string, any>) => {
+  const ordersQuery = new QueryBuilder(Order.find(), query)
+    .sort()
+    .paginate()
+    .filter()
+    .search(ORDER_SEARCHABLE_FIELDS);
+
+  const [orders, meta] = await Promise.all([
+    ordersQuery.modelQuery,
+    ordersQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    orders,
+    meta,
+  };
+};
+
+const updateOrderFromDB = async (id: string, payload: ORDER_STATUS) => {
+  const isExistOrder = await Order.findById(id);
+  if (!isExistOrder) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Order doesn't exist!");
+  }
+  const result = await Order.findOneAndUpdate(
+    { _id: id },
+    {
+      orderStatus: payload,
+      statusLogs: {
+        status: payload,
+        timestamp: new Date(),
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  return result;
+};
+
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
@@ -98,4 +141,6 @@ export const AdminServices = {
   getAllCustomers,
   updateCustomer,
   getAllSubscribers,
+  getAllOrdersFromDB,
+  updateOrderFromDB,
 };

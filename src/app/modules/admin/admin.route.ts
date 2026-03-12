@@ -46,4 +46,17 @@ router.get(
   AdminController.getAllSubscribers,
 );
 
+router.get(
+  '/orders',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getAllOrders,
+);
+
+router.patch(
+  '/orders/:id/status',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  validateRequest(AdminValidations.updateOrderZodSchema),
+  AdminController.updateOrder,
+);
+
 export const adminRoutes = router;
