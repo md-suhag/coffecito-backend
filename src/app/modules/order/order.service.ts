@@ -33,6 +33,8 @@ import { GIFT_CARD_STATUS } from '../giftCard/giftCard.constants';
 import { Payment } from '../payment/payment.model';
 import { User } from '../user/user.model';
 import { calculateDistanceKm } from '../../../util/calculateDistance';
+import { NotificationHelper } from '../../../helpers/notificationHelper';
+import { NOTIFICATION_TYPE } from '../notification/notification.interface';
 
 const createOrderIntoDB = async (
   userId: string,
@@ -273,6 +275,15 @@ const createOrderIntoDB = async (
         { lastOrder: orderIds[0] },
         { session: dbSession },
       );
+
+      // Trigger Notification
+      NotificationHelper.sendAndSaveNotification({
+        receiver: userId,
+        title: 'Order Placed Successfully! ☕',
+        message: `Your order ${createdOrders[0].orderId} has been placed using Wallet.`,
+        type: NOTIFICATION_TYPE.ORDER,
+        data: { orderId: createdOrders[0]._id.toString() },
+      });
     } else if (payload.paymentMethod === PAYMENT_METHOD.GIFT_CARD) {
       const availableGiftCards = await GiftCard.find({
         _id: { $in: customerRecord.giftCards },
@@ -333,6 +344,15 @@ const createOrderIntoDB = async (
         { lastOrder: orderIds[0] },
         { session: dbSession },
       );
+
+      // Trigger Notification
+      NotificationHelper.sendAndSaveNotification({
+        receiver: userId,
+        title: 'Order Placed Successfully! ☕',
+        message: `Your order ${createdOrders[0].orderId} has been placed using Gift Card.`,
+        type: NOTIFICATION_TYPE.ORDER,
+        data: { orderId: createdOrders[0]._id.toString() },
+      });
     } else if (payload.paymentMethod === PAYMENT_METHOD.STRIPE) {
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

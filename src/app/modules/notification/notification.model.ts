@@ -1,10 +1,11 @@
 import { Schema, model } from 'mongoose';
-import { INotification, NotificationModel } from './notification.interface';
+import { INotification, NOTIFICATION_TYPE } from './notification.interface';
 
-const notificationSchema = new Schema<INotification, NotificationModel>(
+const notificationSchema = new Schema<INotification>(
   {
-    type: {
-      type: String,
+    receiver: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     title: {
@@ -15,17 +16,18 @@ const notificationSchema = new Schema<INotification, NotificationModel>(
       type: String,
       required: true,
     },
-    receiver: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+    type: {
+      type: String,
+      enum: Object.values(NOTIFICATION_TYPE),
       required: true,
-    },
-    referenceId: {
-      type: Schema.Types.ObjectId,
     },
     isRead: {
       type: Boolean,
       default: false,
+    },
+    data: {
+      type: Object,
+      default: {},
     },
   },
   {
@@ -33,7 +35,4 @@ const notificationSchema = new Schema<INotification, NotificationModel>(
   },
 );
 
-export const Notification = model<INotification, NotificationModel>(
-  'Notification',
-  notificationSchema,
-);
+export const Notification = model<INotification>('Notification', notificationSchema);

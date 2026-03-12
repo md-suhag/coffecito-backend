@@ -15,66 +15,36 @@ import { giftCardTransactionRoutes } from '../app/modules/giftCardTransaction/gi
 import { giftCardRoutes } from '../app/modules/giftCard/giftCard.route';
 import { walletTransactionRoutes } from '../app/modules/walletTransaction/walletTransaction.route';
 import { walletRoutes } from '../app/modules/wallet/wallet.route';
-import { pointTransactionRoutes } from '../app/modules/pointTransaction/pointTransaction.route';
 import { customerRoutes } from '../app/modules/customer/customer.route';
 import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
-import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
-import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
+
 const router = express.Router();
 
-const apiRoutes = [
-  {
-    path: '/users',
-    route: UserRoutes,
-  },
-  {
-    path: '/auth',
-    route: AuthRoutes,
-  },
-
+const moduleRoutes = [
+  { path: '/users', route: UserRoutes },
+  { path: '/auth', route: AuthRoutes },
   { path: '/customers', route: customerRoutes },
-
-  { path: '/pointTransactions', route: pointTransactionRoutes },
-
   { path: '/wallets', route: walletRoutes },
-
   { path: '/walletTransactions', route: walletTransactionRoutes },
-
   { path: '/giftCards', route: giftCardRoutes },
-
   { path: '/giftCardTransactions', route: giftCardTransactionRoutes },
-
   { path: '/orders', route: orderRoutes },
-
   { path: '/stores', route: storeRoutes },
-  { path: '/admin/stores', route: storeAdminRoutes },
-
   { path: '/payments', route: paymentRoutes },
-
   { path: '/products', route: productRoutes },
-
   { path: '/notifications', route: notificationRoutes },
-
   { path: '/promotions', route: promotionsRoutes },
-
   { path: '/categories', route: categoryRoutes },
-
   { path: '/admin', route: adminRoutes },
-
   { path: '/stripeEvents', route: stripeEventRoutes },
-  { path: '/disclaimers', route: DisclaimerRoutes },
-
   { path: '/carts', route: cartRoutes },
-
   { path: '/emailSubscriptions', route: emailSubscriptionRoutes },
-
   { path: '/favorites', route: favoriteRoutes },
-
   { path: '/analytics', route: analyticsRoutes },
 ];
 
-apiRoutes.forEach(route => router.use(route.path, route.route));
+moduleRoutes.forEach(route => router.use(route.path, route.route));
 
 export default router;

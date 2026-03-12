@@ -1,12 +1,19 @@
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
+
+export enum NOTIFICATION_TYPE {
+  ORDER = 'ORDER',
+  PAYMENT = 'PAYMENT',
+  PROMOTION = 'PROMOTION',
+  SYSTEM = 'SYSTEM',
+}
 
 export type INotification = {
-  type: string;
+  receiver: Types.ObjectId;
   title: string;
   message: string;
-  receiver: Types.ObjectId;
-  referenceId?: Types.ObjectId;
+  type: NOTIFICATION_TYPE;
   isRead: boolean;
+  data?: Record<string, any>;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
-
-export type NotificationModel = Model<INotification>;

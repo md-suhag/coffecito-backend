@@ -26,6 +26,8 @@ import {
   ORDER_STATUS,
 } from '../app/modules/order/order.constants';
 import { Payment } from '../app/modules/payment/payment.model';
+import { NotificationHelper } from '../helpers/notificationHelper';
+import { NOTIFICATION_TYPE } from '../app/modules/notification/notification.interface';
 
 export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
   const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -157,6 +159,15 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
         { lastOrder: orderIds[0] },
         { session },
       );
+
+      // Trigger Notification
+      NotificationHelper.sendAndSaveNotification({
+        receiver: userId,
+        title: 'Order Placed Successfully! ☕',
+        message: `Your payment was successful and your order is being processed.`,
+        type: NOTIFICATION_TYPE.ORDER,
+        data: { orderIds: JSON.stringify(orderIds) },
+      });
     }
   });
 };
