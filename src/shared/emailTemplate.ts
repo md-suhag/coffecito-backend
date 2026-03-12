@@ -113,9 +113,46 @@ const sendGiftCard = (values: ISendGiftCard) => {
   return data;
 };
 
+const emailCampaign = (values: { title: string; description: string }) => {
+  const data = {
+    html: `
+      <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333;">
+          <div style="width: 100%; max-width: 600px; margin: 20px auto; background-color: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <!-- Header -->
+              <div style="background-color: #195ABE; padding: 30px; text-align: center;">
+                  <img src="${config.logo_url}" alt="Logo" style="width: 120px; filter: brightness(0) invert(1);" />
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                  <h1 style="color: #195ABE; font-size: 24px; margin-top: 0; margin-bottom: 20px; font-weight: 600;">
+                      ${values.title}
+                  </h1>
+                  <div style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 30px;">
+                      ${values.description}
+                  </div>
+              </div>
+
+              <!-- Footer -->
+              <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                  <p style="font-size: 12px; color: #999; margin: 0;">
+                      &copy; ${new Date().getFullYear()} Coffecito. All rights reserved.
+                  </p>
+                  <p style="font-size: 12px; color: #999; margin: 5px 0 0;">
+                      You are receiving this email because you subscribed to our newsletter.
+                  </p>
+              </div>
+          </div>
+      </body>
+    `,
+  };
+  return data;
+};
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
   contactUs,
   sendGiftCard,
+  emailCampaign,
 };

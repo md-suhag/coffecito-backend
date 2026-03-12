@@ -38,4 +38,5 @@ export default {
     auth_token: process.env.TWILIO_AUTH_TOKEN,
     phone_number: process.env.TWILIO_PHONE_NUMBER,
   },
+  sendgrid_api_key: process.env.SENDGRID_API_KEY,
 };

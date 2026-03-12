@@ -28,7 +28,22 @@ const unSubscribe = catchAsync(
   },
 );
 
+const sendEmailToSubscribers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await EmailSubscriptionServices.sendEmailToSubscribers(
+      req.body,
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: result.message,
+      data: result,
+    });
+  },
+);
+
 export const EmailSubscriptionController = {
   subscribe,
   unSubscribe,
+  sendEmailToSubscribers,
 };
