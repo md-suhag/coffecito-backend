@@ -266,6 +266,13 @@ const createOrderIntoDB = async (
       cart.totalPrice = 0;
       cart.totalQuantity = 0;
       await cart.save({ session: dbSession });
+
+      // Update last order in customer profile
+      await Customer.findOneAndUpdate(
+        { user: userId },
+        { lastOrder: orderIds[0] },
+        { session: dbSession },
+      );
     } else if (payload.paymentMethod === PAYMENT_METHOD.GIFT_CARD) {
       const availableGiftCards = await GiftCard.find({
         _id: { $in: customerRecord.giftCards },
@@ -319,6 +326,13 @@ const createOrderIntoDB = async (
       cart.totalPrice = 0;
       cart.totalQuantity = 0;
       await cart.save({ session: dbSession });
+
+      // Update last order in customer profile
+      await Customer.findOneAndUpdate(
+        { user: userId },
+        { lastOrder: orderIds[0] },
+        { session: dbSession },
+      );
     } else if (payload.paymentMethod === PAYMENT_METHOD.STRIPE) {
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -568,9 +582,40 @@ const getMyOrderDetailsFromDB = async (userId: string, orderId: string) => {
     items,
   };
 };
+const getLastOrderFromDB = async (userId: string) => {
+  const customer = await Customer.findOne({ user: userId });
+  if (!customer || !customer.lastOrder) {
+    return null;
+  }
+
+  const order = await Order.findOne({
+    _id: customer.lastOrder,
+    customer: userId,
+  }).populate('items.product', 'image readyTime');
+
+  if (!order) {
+    return null;
+  }
+
+  const readyTime = Math.max(
+    ...order.items.map(item => (item.product as any)?.readyTime || 0),
+  );
+
+  return {
+    _id: order._id,
+    orderId: order.orderId,
+    productName: order.items[0]?.productName,
+    totalAmount: order.totalAmount,
+    orderStatus: order.orderStatus,
+    readyTime,
+    previewImage: (order.items[0]?.product as any)?.image,
+  };
+};
+
 export const OrderServices = {
   createOrderIntoDB,
   getMyUpcomingOrdersFromDB,
   getMyCompletedOrdersFromDB,
   getMyOrderDetailsFromDB,
+  getLastOrderFromDB,
 };

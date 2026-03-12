@@ -18,6 +18,12 @@ router.get(
   OrderController.getMyCompletedOrders,
 );
 
+router.get(
+  '/last-order',
+  auth(USER_ROLES.CUSTOMER),
+  OrderController.getLastOrder,
+);
+
 router.post(
   '/',
   auth(USER_ROLES.CUSTOMER),

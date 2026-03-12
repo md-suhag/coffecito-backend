@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { Wallet } from '../app/modules/wallet/wallet.model';
 import { WalletTransaction } from '../app/modules/walletTransaction/walletTransaction.model';
 import { StripeEvent } from '../app/modules/stripeEvent/stripeEvent.model';
+import { Customer } from '../app/modules/customer/customer.model';
 import {
   WALLET_TRANSACTION_STATUS,
   WALLET_TRANSACTION_TYPE,
@@ -149,6 +150,13 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
 
       // 3. Clear Cart
       await Cart.deleteOne({ user: userId }).session(session);
+
+      // 4. Update last order in customer profile
+      await Customer.findOneAndUpdate(
+        { user: userId },
+        { lastOrder: orderIds[0] },
+        { session },
+      );
     }
   });
 };

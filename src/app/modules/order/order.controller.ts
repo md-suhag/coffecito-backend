@@ -59,9 +59,22 @@ const getMyOrderDetails = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getLastOrder = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await OrderServices.getLastOrderFromDB(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Last order fetched successfully',
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
   getMyUpcomingOrders,
   getMyCompletedOrders,
   getMyOrderDetails,
+  getLastOrder,
 };

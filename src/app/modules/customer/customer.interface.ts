@@ -3,11 +3,12 @@ import { Model, Types } from 'mongoose';
 export type ICustomer = {
   user: Types.ObjectId;
   loyaltyPoints: number;
-  favoriteProducts: Types.ObjectId[];
-  favoriteShops: Types.ObjectId[];
-  subscriptionEmail?: string;
-  isSubscriptionEmailVerified: boolean;
-  lastOrderProduct?: Types.ObjectId;
+  // favoriteProducts: Types.ObjectId[];
+  // favoriteShops: Types.ObjectId[];
+  // subscriptionEmail?: string;
+  // isSubscriptionEmailVerified: boolean;
+  // lastOrderProduct?: Types.ObjectId;
+  lastOrder?: Types.ObjectId;
   giftCards: Types.ObjectId[];
 };
 
