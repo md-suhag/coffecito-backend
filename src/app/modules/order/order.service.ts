@@ -295,11 +295,13 @@ const createOrderIntoDB = async (
         await GiftCardTransaction.create(
           [
             {
+              user: userId,
               giftCard: gc._id,
               type: GIFT_CARD_TRANSACTION_TYPE.REDEEM,
               amount: deductAmount,
               balanceAfter: gc.currentBalance,
               status: GIFT_CARD_TRANSACTION_STATUS.SUCCESS,
+              relatedOrder: orderIds[0],
             },
           ],
           { session: dbSession },

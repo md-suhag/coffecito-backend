@@ -3,6 +3,7 @@ import { GiftCard } from './giftCard.model';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import mongoose from 'mongoose';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 import { Customer } from '../customer/customer.model';
 import { GIFT_CARD_STATUS } from './giftCard.constants';
@@ -150,9 +151,79 @@ const getAllAvailableGiftCardsFromDB = async (user: JwtPayload) => {
   };
 };
 
+const getMyAvailableGiftCardsFromDB = async (
+  user: JwtPayload,
+  query: Record<string, unknown>,
+) => {
+  const customer = await Customer.findOne({ user: user.id });
+  if (!customer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
+  }
+
+  const giftCardQuery = new QueryBuilder(
+    GiftCard.find({
+      _id: { $in: customer.giftCards },
+      status: GIFT_CARD_STATUS.ACTIVE,
+    }).sort('-createdAt'),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate();
+
+  const [giftCards, meta] = await Promise.all([
+    giftCardQuery.modelQuery,
+    giftCardQuery.getPaginationInfo(),
+  ]);
+
+  const totalBalance = giftCards.reduce(
+    (acc: number, giftCard: any) => acc + giftCard.currentBalance,
+    0,
+  );
+
+  return {
+    giftCards,
+    totalBalance,
+    meta,
+  };
+};
+
+const getMySentGiftCardsFromDB = async (
+  user: JwtPayload,
+  query: Record<string, unknown>,
+) => {
+  const giftCardQuery = new QueryBuilder(
+    GiftCard.find({
+      sender: user.id,
+    }).sort('-createdAt'),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate();
+
+  const [giftCards, meta] = await Promise.all([
+    giftCardQuery.modelQuery,
+    giftCardQuery.getPaginationInfo(),
+  ]);
+
+  const totalSentAmount = giftCards.reduce(
+    (acc: number, giftCard: any) => acc + giftCard.amount,
+    0,
+  );
+
+  return {
+    giftCards,
+    totalSentAmount,
+    meta,
+  };
+};
+
 export const GiftCardServices = {
   createGiftCard,
   addGiftCard,
   getMyGiftCardsDataFromDB,
   getAllAvailableGiftCardsFromDB,
+  getMyAvailableGiftCardsFromDB,
+  getMySentGiftCardsFromDB,
 };

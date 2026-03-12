@@ -33,4 +33,16 @@ router.get(
   GiftCardController.getAllAvailableGiftCards,
 );
 
+router.get(
+  '/available',
+  auth(USER_ROLES.CUSTOMER),
+  GiftCardController.getMyAvailableGiftCards,
+);
+
+router.get(
+  '/sent',
+  auth(USER_ROLES.CUSTOMER),
+  GiftCardController.getMySentGiftCards,
+);
+
 export const giftCardRoutes = router;

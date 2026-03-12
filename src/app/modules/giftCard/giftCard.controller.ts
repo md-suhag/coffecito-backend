@@ -62,9 +62,41 @@ const getAllAvailableGiftCards = catchAsync(
   },
 );
 
+const getMyAvailableGiftCards = catchAsync(async (req: Request, res: Response) => {
+  const result = await GiftCardServices.getMyAvailableGiftCardsFromDB(
+    req.user as JwtPayload,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Available gift cards fetched successfully',
+    data: result.giftCards,
+    pagination: result.meta,
+  });
+});
+
+const getMySentGiftCards = catchAsync(async (req: Request, res: Response) => {
+  const result = await GiftCardServices.getMySentGiftCardsFromDB(
+    req.user as JwtPayload,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Sent gift cards fetched successfully',
+    data: result.giftCards,
+    pagination: result.meta,
+  });
+});
+
 export const GiftCardController = {
   createGiftCard,
   addGiftCard,
   getMyGiftCardsData,
   getAllAvailableGiftCards,
+  getMyAvailableGiftCards,
+  getMySentGiftCards,
 };

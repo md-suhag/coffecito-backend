@@ -13,6 +13,11 @@ const giftCardTransactionSchema = new Schema<
   GiftCardTransactionModel
 >(
   {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     giftCard: {
       type: Schema.Types.ObjectId,
       ref: 'GiftCard',
@@ -35,6 +40,10 @@ const giftCardTransactionSchema = new Schema<
       type: String,
       enum: GIFT_CARD_TRANSACTION_STATUS,
       default: GIFT_CARD_TRANSACTION_STATUS.PENDING,
+    },
+    relatedOrder: {
+      type: Schema.Types.ObjectId,
+      ref: 'Order',
     },
   },
   {
