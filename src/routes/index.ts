@@ -19,6 +19,7 @@ import { customerRoutes } from '../app/modules/customer/customer.route';
 import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
+import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ const moduleRoutes = [
   { path: '/giftCardTransactions', route: giftCardTransactionRoutes },
   { path: '/orders', route: orderRoutes },
   { path: '/stores', route: storeRoutes },
+  { path: '/admin/stores', route: storeAdminRoutes },
   { path: '/payments', route: paymentRoutes },
   { path: '/products', route: productRoutes },
   { path: '/notifications', route: notificationRoutes },

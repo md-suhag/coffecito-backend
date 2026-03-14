@@ -114,6 +114,10 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       default: null,
     },
+    store: {
+      type: Schema.Types.ObjectId,
+      ref: 'Store',
+    },
   },
   { timestamps: true },
 );

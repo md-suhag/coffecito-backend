@@ -29,6 +29,7 @@ export type IUser = {
     expireAt: Date;
   };
   deviceToken?: string;
+  store?: Types.ObjectId;
 };
 
 export type UserModal = {

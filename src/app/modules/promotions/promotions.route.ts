@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post(
   '/',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MARKETER),
   fileUploadHandler(),
   validateRequest(PromotionsValidations.createPromotionsZodSchema),
   PromotionsController.createPromotions,
@@ -22,14 +22,14 @@ router.get('/admin', PromotionsController.getAllPromotions);
 
 router.patch(
   '/:id/status',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MARKETER),
   validateRequest(PromotionsValidations.updateStatusZodSchema),
   PromotionsController.updateStatus,
 );
 
 router.delete(
   '/:id',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MARKETER),
   PromotionsController.deletePromotions,
 );
 

@@ -59,4 +59,11 @@ router.patch(
   AdminController.updateOrder,
 );
 
+router.post(
+  '/users',
+  auth(USER_ROLES.SUPER_ADMIN),
+  validateRequest(AdminValidations.createUserZodSchema),
+  AdminController.createUser,
+);
+
 export const adminRoutes = router;

@@ -139,6 +139,11 @@ const updateOrderFromDB = async (id: string, payload: ORDER_STATUS) => {
   return result;
 };
 
+const createUserToDB = async (payload: IUser) => {
+  const result = await User.create(payload);
+  return result;
+};
+
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
@@ -148,4 +153,5 @@ export const AdminServices = {
   getAllSubscribers,
   getAllOrdersFromDB,
   updateOrderFromDB,
+  createUserToDB,
 };

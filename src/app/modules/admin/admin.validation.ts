@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { USER_STATUS } from '../user/user.constant';
+import { USER_ROLES, USER_STATUS } from '../user/user.constant';
 import { ORDER_STATUS } from '../order/order.constants';
 
 const createCategoryZodSchema = z.object({
@@ -51,10 +51,34 @@ const updateOrderZodSchema = z.object({
     .strict(),
 });
 
+const createUserZodSchema = z.object({
+  body: z
+    .object({
+      name: z.string({ required_error: 'Name is required' }),
+      email: z.string({ required_error: 'Email is required' }).email(),
+      password: z
+        .string({ required_error: 'Password is required' })
+        .min(8, 'Password must be at least 8 characters long'),
+      role: z.enum([USER_ROLES.ADMIN, USER_ROLES.MARKETER, USER_ROLES.BARISTA]),
+      store: z.string().optional(),
+      phone: z.string().optional(),
+    })
+    .refine(
+      data =>
+        ![USER_ROLES.ADMIN, USER_ROLES.BARISTA].includes(data.role) ||
+        Boolean(data.store),
+      {
+        message: 'Store is required for ADMIN and BARISTA',
+        path: ['store'],
+      },
+    ),
+});
+
 export const AdminValidations = {
   createCategoryZodSchema,
   updateCategoryZodSchema,
   contactUsSchema,
   updateCustomerStatusZodSchema,
   updateOrderZodSchema,
+  createUserZodSchema,
 };

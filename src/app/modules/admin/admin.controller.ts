@@ -3,6 +3,7 @@ import { AdminServices } from './admin.service';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
+import { AUTH_PROVIDERS } from '../user/user.constant';
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminServices.createCategoryToDB(req.body);
@@ -98,6 +99,23 @@ const updateOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const data = {
+    ...req.body,
+    isVerified: true,
+    isEmailVerified: true,
+    authProviders: [AUTH_PROVIDERS.LOCAL],
+  };
+  const result = await AdminServices.createUserToDB(data);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User created successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
@@ -107,4 +125,5 @@ export const AdminController = {
   getAllSubscribers,
   getAllOrders,
   updateOrder,
+  createUser,
 };
