@@ -63,6 +63,9 @@ const storeSchema = new Schema<IStore, StoreModel>(
       type: Boolean,
       default: false,
     },
+    timezone: {
+      type: String,
+    },
     about: {
       type: String,
     },
@@ -71,6 +74,52 @@ const storeSchema = new Schema<IStore, StoreModel>(
     timestamps: true,
   },
 );
+
+// Map latitude and longitude to timezone before saving
+storeSchema.pre('save', async function (next) {
+  if (this.isModified('location')) {
+    try {
+      const { find } = await import('geo-tz');
+      const [lng, lat] = this.location.coordinates;
+      const tzs = find(lat, lng);
+      if (tzs && tzs.length > 0) {
+        this.timezone = tzs[0];
+      }
+    } catch (error) {
+      console.error('Error finding timezone for coordinates:', error);
+    }
+  }
+  next();
+});
+
+// Map latitude and longitude to timezone before updating
+storeSchema.pre('findOneAndUpdate', async function (next) {
+  const update = this.getUpdate() as any;
+
+  // Check if location is being updated (flat or via $set)
+  let location = update.location;
+  if (!location && update.$set) {
+    location = update.$set.location;
+  }
+
+  if (location && location.coordinates) {
+    try {
+      const { find } = await import('geo-tz');
+      const [lng, lat] = location.coordinates;
+      const tzs = find(lat, lng);
+      if (tzs && tzs.length > 0) {
+        if (update.$set) {
+          update.$set.timezone = tzs[0];
+        } else {
+          update.timezone = tzs[0];
+        }
+      }
+    } catch (error) {
+      console.error('Error finding timezone during update:', error);
+    }
+  }
+  next();
+});
 
 storeSchema.index({ location: '2dsphere' });
 

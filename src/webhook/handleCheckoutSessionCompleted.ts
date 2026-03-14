@@ -2,7 +2,8 @@
 // import Stripe from 'stripe';
 // import { Customer } from '../app/modules/customer/customer.model';
 // import { Wallet } from '../app/modules/wallet/wallet.model';
-// import { WalletTransaction } from '../app/modules/walletTransaction/walletTransaction.model';
+import { WalletTransaction } from '../app/modules/walletTransaction/walletTransaction.model';
+import { generateSecureId } from '../util/generateId';
 // import {
 //   WALLET_TRANSACTION_STATUS,
 //   WALLET_TRANSACTION_TYPE,
@@ -33,6 +34,7 @@
 //       status: WALLET_TRANSACTION_STATUS.SUCCESS,
 //       balanceAfter: (wallet?.balance || 0) + Number(amount),
 //       wallet: wallet?._id,
+//       transactionId: await generateSecureId('WTXN-', WalletTransaction, 'transactionId'),
 //     });
 
 //     await StripeEvent.updateOne(

@@ -21,6 +21,7 @@ export type IStore = {
   isConnectedAccountReady?: boolean;
   isActive: boolean;
   isDeleted: boolean;
+  timezone: string;
   about?: string;
 };
 

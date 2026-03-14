@@ -29,7 +29,7 @@ const getAllStoresFromDB = async (query: Record<string, unknown>) => {
   ]);
 
   return {
-    stores,
+    stores: stores.map((s) => ({ ...s.toObject(), isOpen: isStoreOpen(s) })),
     meta,
   };
 };
@@ -84,6 +84,12 @@ const getAllStoresForCustomerFromDB = async (
     storesWithFavorite = storesWithFavorite.map((store) => ({
       ...store,
       isFavorite: favoriteSet.has(store._id.toString()),
+      isOpen: isStoreOpen(store as any),
+    }));
+  } else {
+    storesWithFavorite = storesWithFavorite.map((store) => ({
+      ...store,
+      isOpen: isStoreOpen(store as any),
     }));
   }
 
@@ -164,11 +170,42 @@ const connectStripeIntoDB = async (id: string) => {
   };
 };
 
+const isStoreOpen = (store: IStore): boolean => {
+  if (!store.hours || store.hours.length === 0 || !store.timezone) {
+    return false;
+  }
+
+  const { formatInTimeZone } = require('date-fns-tz');
+  const now = new Date();
+  const currentDay = formatInTimeZone(now, store.timezone, 'EEEE');
+  const currentTime = formatInTimeZone(now, store.timezone, 'HH:mm');
+
+  const todaysHours = store.hours.find((h) => h.day === currentDay);
+
+  if (!todaysHours) {
+    return false;
+  }
+
+  const { open, close } = todaysHours;
+
+  // Handle cases where store might close after midnight
+  if (close < open) {
+    return currentTime >= open || currentTime <= close;
+  }
+
+  return currentTime >= open && currentTime <= close;
+};
+
 const getAllProductsOfAStoreFromDB = async (
   id: string,
   query: Record<string, unknown>,
   userId?: string,
 ) => {
+  const store = await Store.findById(id);
+  if (!store) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Store not found');
+  }
+
   const productsQuery = new QueryBuilder(
     Product.find({ store: id }).select(
       'store category name image readyTime basePrice dietaryLabels',
@@ -185,7 +222,7 @@ const getAllProductsOfAStoreFromDB = async (
     productsQuery.getPaginationInfo(),
   ]);
 
-  let productsWithFavorite = products.map(product => ({
+  let productsWithFavorite = products.map((product) => ({
     ...product.toObject(),
     isFavorite: false,
   }));
@@ -193,12 +230,12 @@ const getAllProductsOfAStoreFromDB = async (
   if (userId) {
     const favoriteProductIds = await Favorite.find({
       user: userId,
-      product: { $in: products.map(p => p._id) },
+      product: { $in: products.map((p) => p._id) },
     }).distinct('product');
 
-    const favoriteSet = new Set(favoriteProductIds.map(id => id.toString()));
+    const favoriteSet = new Set(favoriteProductIds.map((id) => id.toString()));
 
-    productsWithFavorite = productsWithFavorite.map(product => ({
+    productsWithFavorite = productsWithFavorite.map((product) => ({
       ...product,
       isFavorite: favoriteSet.has(product._id.toString()),
     }));
@@ -206,6 +243,7 @@ const getAllProductsOfAStoreFromDB = async (
 
   return {
     products: productsWithFavorite,
+    isOpen: isStoreOpen(store),
     meta,
   };
 };
