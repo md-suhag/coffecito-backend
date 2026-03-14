@@ -172,6 +172,11 @@ const orderSchema = new Schema<IOrder, OrderModel>(
       type: String,
       index: true,
     },
+    transactionId: {
+      type: String,
+      unique: true,
+      index: true,
+    },
     stripeFee: {
       type: Number,
       default: 0,

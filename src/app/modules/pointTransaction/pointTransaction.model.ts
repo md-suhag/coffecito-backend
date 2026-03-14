@@ -28,6 +28,11 @@ const pointTransactionSchema = new Schema<
       type: Number,
       required: true,
     },
+    transactionId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     relatedOrderId: {
       type: Schema.Types.ObjectId,
       ref: 'Order',

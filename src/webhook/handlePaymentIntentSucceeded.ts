@@ -29,6 +29,7 @@ import { Payment } from '../app/modules/payment/payment.model';
 import { NotificationHelper } from '../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../app/modules/notification/notification.interface';
 import { PointTransactionServices } from '../app/modules/pointTransaction/pointTransaction.service';
+import { generateSecureId } from '../util/generateId';
 
 export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
   const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -62,6 +63,7 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
             status: WALLET_TRANSACTION_STATUS.SUCCESS,
             balanceAfter: wallet.balance,
             wallet: wallet._id,
+            transactionId: await generateSecureId('WTXN-', WalletTransaction, 'transactionId'),
             title: 'Add Money',
           },
         ],
@@ -91,6 +93,7 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
               type: GIFT_CARD_TRANSACTION_TYPE.PURCHASE,
               amount: amount,
               balanceAfter: amount,
+              transactionId: await generateSecureId('GTXN-', GiftCardTransaction, 'transactionId'),
               status: GIFT_CARD_TRANSACTION_STATUS.SUCCESS,
             },
           ],

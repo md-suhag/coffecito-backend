@@ -6,6 +6,7 @@ export type IPointTransaction = {
   pointsChange: number;
   type: POINT_TRANSACTION_TYPE;
   balanceAfter: number;
+  transactionId: string;
   relatedOrderId?: Types.ObjectId;
 };
 

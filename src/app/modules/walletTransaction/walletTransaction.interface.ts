@@ -10,6 +10,7 @@ export type IWalletTransaction = {
   type: WALLET_TRANSACTION_TYPE;
   amount: number;
   balanceAfter: number;
+  transactionId: string;
   paymentGatewayData?: Record<string, any>;
   status: WALLET_TRANSACTION_STATUS;
   title: string;

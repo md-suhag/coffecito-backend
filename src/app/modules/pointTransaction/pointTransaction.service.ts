@@ -6,6 +6,7 @@ import { EARN_POINT_RATE } from '../order/order.constants';
 import { POINT_TRANSACTION_TYPE } from './pointTransaction.constants';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Order } from '../order/order.model';
+import { generateSecureId } from '../../../util/generateId';
 
 const earnPoints = async (
   userId: string,
@@ -36,6 +37,7 @@ const earnPoints = async (
     pointsChange: pointsToEarn,
     type: POINT_TRANSACTION_TYPE.EARN,
     balanceAfter: customer.loyaltyPoints,
+    transactionId: await generateSecureId('PTXN-', PointTransaction, 'transactionId'),
     relatedOrderId: orderId as any,
   };
 
@@ -47,6 +49,9 @@ const createTransaction = async (
   payload: Partial<IPointTransaction>,
   session?: ClientSession,
 ) => {
+  if (!payload.transactionId) {
+    payload.transactionId = await generateSecureId('PTXN-', PointTransaction, 'transactionId');
+  }
   const result = await PointTransaction.create([payload], { session });
   return result[0];
 };

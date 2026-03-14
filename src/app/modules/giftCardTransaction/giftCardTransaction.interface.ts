@@ -10,6 +10,7 @@ export type IGiftCardTransaction = {
   type: GIFT_CARD_TRANSACTION_TYPE;
   amount: number;
   balanceAfter: number;
+  transactionId: string;
   status: GIFT_CARD_TRANSACTION_STATUS;
   relatedOrder?: Types.ObjectId;
 };

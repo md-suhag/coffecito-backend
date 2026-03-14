@@ -36,6 +36,11 @@ const giftCardTransactionSchema = new Schema<
       type: Number,
       required: true,
     },
+    transactionId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     status: {
       type: String,
       enum: GIFT_CARD_TRANSACTION_STATUS,

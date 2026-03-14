@@ -14,18 +14,19 @@ import {
   LOYALTY_POINTS_PER_DOLLAR,
   EARN_POINT_RATE,
 } from './order.constants';
-import { generateOrderId } from '../../../util/generateOrderId';
+import { generateSecureId } from '../../../util/generateId';
 import { Customer } from '../customer/customer.model';
+import { PointTransaction } from '../pointTransaction/pointTransaction.model';
+import { GiftCardTransaction } from '../giftCardTransaction/giftCardTransaction.model';
+import { WalletTransaction } from '../walletTransaction/walletTransaction.model';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Wallet } from '../wallet/wallet.model';
-import { WalletTransaction } from '../walletTransaction/walletTransaction.model';
 import {
   WALLET_TRANSACTION_STATUS,
   WALLET_TRANSACTION_TYPE,
 } from '../walletTransaction/walletTransaction.constants';
 import { GiftCard } from '../giftCard/giftCard.model';
-import { GiftCardTransaction } from '../giftCardTransaction/giftCardTransaction.model';
 import {
   GIFT_CARD_TRANSACTION_STATUS,
   GIFT_CARD_TRANSACTION_TYPE,
@@ -187,6 +188,7 @@ const createOrderIntoDB = async (
           pointsChange: -pointsToDeduct,
           type: POINT_TRANSACTION_TYPE.SPEND,
           balanceAfter: customerRecord.loyaltyPoints,
+          transactionId: await generateSecureId('PTXN-', PointTransaction, 'transactionId'),
         },
         dbSession,
       );
@@ -199,7 +201,7 @@ const createOrderIntoDB = async (
 
     for (const storeId of storeIds) {
       const storeData = storeOrders[storeId];
-      const orderId = await generateOrderId();
+      const orderId = await generateSecureId('ORD-', Order, 'orderId');
 
       // Proportional discount if applicable
       const orderProportion =
@@ -264,6 +266,7 @@ const createOrderIntoDB = async (
           ? `${firstItem.productName} & ${cart.items.length - 1} more`
           : firstItem.productName;
 
+      const walletTransactionId = await generateSecureId('WTXN-', WalletTransaction, 'transactionId');
       const walletTx = await WalletTransaction.create(
         [
           {
@@ -272,20 +275,27 @@ const createOrderIntoDB = async (
             type: WALLET_TRANSACTION_TYPE.SPEND,
             amount: totalCartAmount,
             balanceAfter: wallet.balance,
+            transactionId: walletTransactionId,
             status: WALLET_TRANSACTION_STATUS.SUCCESS,
             title,
-            relatedOrder: orderIds[0], // Linking to the first order ID (multi-store orders share one payment/transaction record in this context usually)
+            relatedOrder: orderIds[0],
           },
         ],
         { session: dbSession },
       );
 
+      const internalTransactionId = await generateSecureId(
+        'OTXN-',
+        Order,
+        'transactionId',
+      );
       // Mark orders as PAID
       await Order.updateMany(
         { _id: { $in: orderIds } },
         {
           paymentStatus: PAYMENT_STATUS.PAID,
           paymentId: walletTx[0]._id.toString(),
+          transactionId: internalTransactionId,
         },
         { session: dbSession },
       );
@@ -353,6 +363,7 @@ const createOrderIntoDB = async (
               type: GIFT_CARD_TRANSACTION_TYPE.REDEEM,
               amount: deductAmount,
               balanceAfter: gc.currentBalance,
+              transactionId: await generateSecureId('GTXN-', GiftCardTransaction, 'transactionId'),
               status: GIFT_CARD_TRANSACTION_STATUS.SUCCESS,
               relatedOrder: orderIds[0],
             },
@@ -361,10 +372,20 @@ const createOrderIntoDB = async (
         );
       }
 
+      const internalTransactionIdGC = await generateSecureId(
+        'OTXN-',
+        Order,
+        'transactionId',
+      );
+
       // Mark orders as PAID
       await Order.updateMany(
         { _id: { $in: orderIds } },
-        { paymentStatus: PAYMENT_STATUS.PAID },
+        {
+          paymentStatus: PAYMENT_STATUS.PAID,
+          paymentId: 'GIFT_CARD_PAYMENT', // Placeholder or use common link
+          transactionId: internalTransactionIdGC,
+        },
         { session: dbSession },
       );
 
@@ -396,7 +417,11 @@ const createOrderIntoDB = async (
         orderIds[0],
         dbSession,
       );
-    } else if (payload.paymentMethod === PAYMENT_METHOD.STRIPE) {
+      const internalTransactionIdStripe = await generateSecureId(
+        'OTXN-',
+        Order,
+        'transactionId',
+      );
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -419,6 +444,7 @@ const createOrderIntoDB = async (
           type: 'order_payment',
           userId,
           orderIds: JSON.stringify(orderIds),
+          internalTransactionId: internalTransactionIdStripe,
           storeBreakdown: JSON.stringify(
             storeIds.map(sid => ({
               storeId: sid,
@@ -433,6 +459,7 @@ const createOrderIntoDB = async (
             type: 'order_payment',
             userId,
             orderIds: JSON.stringify(orderIds),
+            internalTransactionId: internalTransactionIdStripe,
             storeBreakdown: JSON.stringify(
               storeIds.map(sid => ({
                 storeId: sid,
@@ -446,10 +473,13 @@ const createOrderIntoDB = async (
 
       paymentResult = { checkoutUrl: stripeSession.url };
 
-      // Update orders with paymentId (Session ID)
+      // Update orders with stripeSession.id and internalTransactionIdStripe
       await Order.updateMany(
         { _id: { $in: orderIds } },
-        { paymentId: stripeSession.id },
+        { 
+          paymentId: stripeSession.id,
+          transactionId: internalTransactionIdStripe 
+        },
         { session: dbSession },
       );
     }
