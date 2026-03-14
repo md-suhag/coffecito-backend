@@ -56,7 +56,14 @@ const getMyPointTransactionsFromDB = async (
   query: Record<string, any>,
 ) => {
   const pointTransactionQuery = new QueryBuilder(
-    PointTransaction.find({ user: userId }),
+    PointTransaction.find({ user: userId }).populate({
+      path: 'relatedOrderId',
+      select: 'orderId totalAmount createdAt',
+      populate: {
+        path: 'store',
+        select: 'name image address',
+      },
+    }),
     query,
   )
     .sort()
