@@ -10,10 +10,20 @@ const createProductIntoDB = async (payload: IProduct) => {
   return result;
 };
 
-const getAllProductsFromDB = async (query: Record<string, unknown>) => {
+const getAllProductsFromDB = async (
+  query: Record<string, unknown>,
+  user: any,
+) => {
+  const queryObj = { ...query };
+
+  // If user is not super_admin and has a store assigned, restrict to that store
+  if (user?.role !== 'super_admin' && user?.store) {
+    queryObj.store = user.store;
+  }
+
   const productsQuery = new QueryBuilder(
     Product.find().populate('store', 'name'),
-    query,
+    queryObj,
   )
     .search(PRODUCT_SEARCHABLE_FIELDS)
     .filter()
