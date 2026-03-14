@@ -37,4 +37,9 @@ router.get(
   OrderController.getMyOrderDetails,
 );
 
+router.get(
+  '/transactions/history',
+  auth(USER_ROLES.CUSTOMER),
+  OrderController.getMyOrderTransactions,
+);
 export const orderRoutes = router;

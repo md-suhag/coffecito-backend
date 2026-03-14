@@ -188,7 +188,11 @@ const createOrderIntoDB = async (
           pointsChange: -pointsToDeduct,
           type: POINT_TRANSACTION_TYPE.SPEND,
           balanceAfter: customerRecord.loyaltyPoints,
-          transactionId: await generateSecureId('PTXN-', PointTransaction, 'transactionId'),
+          transactionId: await generateSecureId(
+            'PTXN-',
+            PointTransaction,
+            'transactionId',
+          ),
         },
         dbSession,
       );
@@ -266,7 +270,11 @@ const createOrderIntoDB = async (
           ? `${firstItem.productName} & ${cart.items.length - 1} more`
           : firstItem.productName;
 
-      const walletTransactionId = await generateSecureId('WTXN-', WalletTransaction, 'transactionId');
+      const walletTransactionId = await generateSecureId(
+        'WTXN-',
+        WalletTransaction,
+        'transactionId',
+      );
       const walletTx = await WalletTransaction.create(
         [
           {
@@ -363,7 +371,11 @@ const createOrderIntoDB = async (
               type: GIFT_CARD_TRANSACTION_TYPE.REDEEM,
               amount: deductAmount,
               balanceAfter: gc.currentBalance,
-              transactionId: await generateSecureId('GTXN-', GiftCardTransaction, 'transactionId'),
+              transactionId: await generateSecureId(
+                'GTXN-',
+                GiftCardTransaction,
+                'transactionId',
+              ),
               status: GIFT_CARD_TRANSACTION_STATUS.SUCCESS,
               relatedOrder: orderIds[0],
             },
@@ -476,9 +488,9 @@ const createOrderIntoDB = async (
       // Update orders with stripeSession.id and internalTransactionIdStripe
       await Order.updateMany(
         { _id: { $in: orderIds } },
-        { 
+        {
           paymentId: stripeSession.id,
-          transactionId: internalTransactionIdStripe 
+          transactionId: internalTransactionIdStripe,
         },
         { session: dbSession },
       );
@@ -709,10 +721,37 @@ const getLastOrderFromDB = async (userId: string) => {
   };
 };
 
+const getMyOrderTransactionsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const transactionQuery = new QueryBuilder(
+    Order.find({
+      customer: userId,
+    }).select(
+      'orderId transactionId totalAmount paymentMethod paymentStatus orderStatus createdAt tipAmount pointsEarned loyaltyPointsUsed',
+    ),
+    query,
+  )
+    .sort()
+    .paginate();
+
+  const [transactions, meta] = await Promise.all([
+    transactionQuery.modelQuery,
+    transactionQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    transactions,
+    meta,
+  };
+};
+
 export const OrderServices = {
   createOrderIntoDB,
   getMyUpcomingOrdersFromDB,
   getMyCompletedOrdersFromDB,
   getMyOrderDetailsFromDB,
   getLastOrderFromDB,
+  getMyOrderTransactionsFromDB,
 };

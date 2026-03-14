@@ -71,10 +71,28 @@ const getLastOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyOrderTransactions = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await OrderServices.getMyOrderTransactionsFromDB(
+      req.user.id,
+      req.query,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Order transactions fetched successfully',
+      data: result.transactions,
+      pagination: result.meta,
+    });
+  },
+);
+
 export const OrderController = {
   createOrder,
   getMyUpcomingOrders,
   getMyCompletedOrders,
   getMyOrderDetails,
   getLastOrder,
+  getMyOrderTransactions,
 };
