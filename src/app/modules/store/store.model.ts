@@ -123,13 +123,8 @@ storeSchema.pre('findOneAndUpdate', async function (next) {
 
 storeSchema.index({ location: '2dsphere' });
 
-// Filter out deleted stores for find queries
-storeSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
-});
-
-storeSchema.pre('findOne', function (next) {
+// Filter out deleted stores for find and count queries
+storeSchema.pre(/^find|^count/, function (this: any, next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });

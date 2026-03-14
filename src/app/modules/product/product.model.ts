@@ -116,13 +116,8 @@ const productSchema = new Schema<IProduct, ProductModel>(
   },
 );
 
-// Filter out deleted products for find queries
-productSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
-});
-
-productSchema.pre('findOne', function (next) {
+// Filter out deleted products for find and count queries
+productSchema.pre(/^find|^count/, function (this: any, next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });

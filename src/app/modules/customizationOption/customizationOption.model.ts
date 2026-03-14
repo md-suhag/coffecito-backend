@@ -38,13 +38,8 @@ const customizationOptionSchema = new Schema<
   },
 );
 
-// Filter out deleted options for find queries
-customizationOptionSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
-});
-
-customizationOptionSchema.pre('findOne', function (next) {
+// Filter out deleted options for find and count queries
+customizationOptionSchema.pre(/^find|^count/, function (this: any, next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });
