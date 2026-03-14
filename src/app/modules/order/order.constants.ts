@@ -21,3 +21,4 @@ export enum ORDER_STATUS {
 }
 
 export const LOYALTY_POINTS_PER_DOLLAR = 10;
+export const EARN_POINT_RATE = 10; // $10 spent = 1 point

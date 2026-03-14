@@ -12,6 +12,7 @@ import {
   PAYMENT_METHOD,
   PAYMENT_STATUS,
   LOYALTY_POINTS_PER_DOLLAR,
+  EARN_POINT_RATE,
 } from './order.constants';
 import { generateOrderId } from '../../../util/generateOrderId';
 import { Customer } from '../customer/customer.model';
@@ -35,13 +36,15 @@ import { User } from '../user/user.model';
 import { calculateDistanceKm } from '../../../util/calculateDistance';
 import { NotificationHelper } from '../../../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../notification/notification.interface';
+import { PointTransactionServices } from '../pointTransaction/pointTransaction.service';
+import { POINT_TRANSACTION_TYPE } from '../pointTransaction/pointTransaction.constants';
 
 const createOrderIntoDB = async (
   userId: string,
   payload: {
     paymentMethod: PAYMENT_METHOD;
     tipAmount: number;
-    useLoyaltyPoints: boolean;
+    loyaltyPointsToUse: number;
     pickupTime?: string;
   },
 ) => {
@@ -143,20 +146,32 @@ const createOrderIntoDB = async (
       throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
     }
 
-    // Handle Loyalty Points Logic (10 points = $1)
+    // Handle Loyalty Points Logic (2 points = $1)
     let totalLoyaltyDiscount = 0;
     let pointsToDeduct = 0;
-    if (
-      payload.useLoyaltyPoints &&
-      customerRecord.loyaltyPoints >= LOYALTY_POINTS_PER_DOLLAR
-    ) {
+    if (payload.loyaltyPointsToUse > 0) {
+      if (customerRecord.loyaltyPoints < payload.loyaltyPointsToUse) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          'Insufficient loyalty points',
+        );
+      }
+
+      if (payload.loyaltyPointsToUse < LOYALTY_POINTS_PER_DOLLAR) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          `Minimum ${LOYALTY_POINTS_PER_DOLLAR} points (equivalent to $1) required for redemption`,
+        );
+      }
+
       const totalSubtotal = storeIds.reduce(
         (acc, sid) => acc + storeOrders[sid].subtotal,
         0,
       );
-      const possibleDiscount =
-        customerRecord.loyaltyPoints / LOYALTY_POINTS_PER_DOLLAR;
-      totalLoyaltyDiscount = Math.min(possibleDiscount, totalSubtotal);
+
+      const requestedDiscount =
+        payload.loyaltyPointsToUse / LOYALTY_POINTS_PER_DOLLAR;
+      totalLoyaltyDiscount = Math.min(requestedDiscount, totalSubtotal);
       pointsToDeduct = Math.round(
         totalLoyaltyDiscount * LOYALTY_POINTS_PER_DOLLAR,
       );
@@ -164,6 +179,17 @@ const createOrderIntoDB = async (
       // Deduct points from customer immediately since it's validated
       customerRecord.loyaltyPoints -= pointsToDeduct;
       await customerRecord.save({ session: dbSession });
+
+      // Record point deduction transaction
+      await PointTransactionServices.createTransaction(
+        {
+          user: userId as any,
+          pointsChange: -pointsToDeduct,
+          type: POINT_TRANSACTION_TYPE.SPEND,
+          balanceAfter: customerRecord.loyaltyPoints,
+        },
+        dbSession,
+      );
     }
 
     const totalOrderSubtotal = storeIds.reduce(
@@ -200,6 +226,7 @@ const createOrderIntoDB = async (
         paymentMethod: payload.paymentMethod,
         paymentStatus: PAYMENT_STATUS.PENDING,
         orderStatus: ORDER_STATUS.PENDING,
+        pointsEarned: Math.floor(totalAmount / EARN_POINT_RATE),
         loyaltyPointsUsed: Math.round(orderPointsUsed),
         pickupTime: payload.pickupTime
           ? new Date(payload.pickupTime)
@@ -284,6 +311,14 @@ const createOrderIntoDB = async (
         type: NOTIFICATION_TYPE.ORDER,
         data: { orderId: createdOrders[0]._id.toString() },
       });
+
+      // Earn points for Wallet payment
+      await PointTransactionServices.earnPoints(
+        userId,
+        totalCartAmount,
+        orderIds[0],
+        dbSession,
+      );
     } else if (payload.paymentMethod === PAYMENT_METHOD.GIFT_CARD) {
       const availableGiftCards = await GiftCard.find({
         _id: { $in: customerRecord.giftCards },
@@ -353,6 +388,14 @@ const createOrderIntoDB = async (
         type: NOTIFICATION_TYPE.ORDER,
         data: { orderId: createdOrders[0]._id.toString() },
       });
+
+      // Earn points for Gift Card payment
+      await PointTransactionServices.earnPoints(
+        userId,
+        totalCartAmount,
+        orderIds[0],
+        dbSession,
+      );
     } else if (payload.paymentMethod === PAYMENT_METHOD.STRIPE) {
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -414,8 +457,11 @@ const createOrderIntoDB = async (
     await dbSession.commitTransaction();
     dbSession.endSession();
 
+    // Re-fetch orders to reflect updated status and points
+    const finalOrders = await Order.find({ _id: { $in: orderIds } });
+
     return {
-      orders: createdOrders,
+      orders: finalOrders,
       paymentResult,
     };
   } catch (error) {

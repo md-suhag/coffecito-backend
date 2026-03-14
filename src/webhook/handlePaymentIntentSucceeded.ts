@@ -28,6 +28,7 @@ import {
 import { Payment } from '../app/modules/payment/payment.model';
 import { NotificationHelper } from '../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../app/modules/notification/notification.interface';
+import { PointTransactionServices } from '../app/modules/pointTransaction/pointTransaction.service';
 
 export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
   const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -168,6 +169,14 @@ export const handlePaymentIntentSucceeded = async (event: Stripe.Event) => {
         type: NOTIFICATION_TYPE.ORDER,
         data: { orderIds: JSON.stringify(orderIds) },
       });
+
+      // Earn points for Stripe payment
+      await PointTransactionServices.earnPoints(
+        userId,
+        amount,
+        orderIds[0],
+        session,
+      );
     }
   });
 };

@@ -11,10 +11,12 @@ const giftCardSchema = new Schema<IGiftCard, GiftCardModel>(
     },
     amount: {
       type: Number,
+      min: 0,
       required: true,
     },
     currentBalance: {
       type: Number,
+      min: 0,
       required: true,
     },
     sender: {

@@ -10,6 +10,7 @@ const customerSchema = new Schema<ICustomer, CustomerModel>(
     },
     loyaltyPoints: {
       type: Number,
+      min: 0,
       default: 0,
     },
     // favoriteProducts: [

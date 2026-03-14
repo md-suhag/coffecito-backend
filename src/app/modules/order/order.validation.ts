@@ -6,8 +6,8 @@ const createOrderValidationSchema = z.object({
     paymentMethod: z.enum(
       Object.values(PAYMENT_METHOD) as [string, ...string[]],
     ),
-    tipAmount: z.number().optional().default(0),
-    useLoyaltyPoints: z.boolean().optional().default(false),
+    tipAmount: z.number().nonnegative().int().optional().default(0),
+    loyaltyPointsToUse: z.number().nonnegative().int().optional().default(0),
     pickupTime: z.string().datetime().optional(),
   }),
 });

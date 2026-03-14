@@ -16,6 +16,7 @@ import { giftCardRoutes } from '../app/modules/giftCard/giftCard.route';
 import { walletTransactionRoutes } from '../app/modules/walletTransaction/walletTransaction.route';
 import { walletRoutes } from '../app/modules/wallet/wallet.route';
 import { customerRoutes } from '../app/modules/customer/customer.route';
+import { pointTransactionRoutes } from '../app/modules/pointTransaction/pointTransaction.route';
 import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
@@ -45,6 +46,7 @@ const moduleRoutes = [
   { path: '/emailSubscriptions', route: emailSubscriptionRoutes },
   { path: '/favorites', route: favoriteRoutes },
   { path: '/analytics', route: analyticsRoutes },
+  { path: '/pointTransactions', route: pointTransactionRoutes },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
