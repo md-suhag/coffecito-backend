@@ -29,7 +29,7 @@ const getAllStoresFromDB = async (query: Record<string, unknown>) => {
   ]);
 
   return {
-    stores: stores.map((s) => ({ ...s.toObject(), isOpen: isStoreOpen(s) })),
+    stores: stores.map(s => ({ ...s.toObject(), isOpen: isStoreOpen(s) })),
     meta,
   };
 };
@@ -68,7 +68,7 @@ const getAllStoresForCustomerFromDB = async (
     storesQuery.getPaginationInfo(),
   ]);
 
-  let storesWithFavorite = stores.map((store) => ({
+  let storesWithFavorite = stores.map(store => ({
     ...store.toObject(),
     isFavorite: false,
   }));
@@ -76,18 +76,18 @@ const getAllStoresForCustomerFromDB = async (
   if (userId) {
     const favoriteStoreIds = await Favorite.find({
       user: userId,
-      store: { $in: stores.map((s) => s._id) },
+      store: { $in: stores.map(s => s._id) },
     }).distinct('store');
 
-    const favoriteSet = new Set(favoriteStoreIds.map((id) => id.toString()));
+    const favoriteSet = new Set(favoriteStoreIds.map(id => id.toString()));
 
-    storesWithFavorite = storesWithFavorite.map((store) => ({
+    storesWithFavorite = storesWithFavorite.map(store => ({
       ...store,
       isFavorite: favoriteSet.has(store._id.toString()),
       isOpen: isStoreOpen(store as any),
     }));
   } else {
-    storesWithFavorite = storesWithFavorite.map((store) => ({
+    storesWithFavorite = storesWithFavorite.map(store => ({
       ...store,
       isOpen: isStoreOpen(store as any),
     }));
@@ -100,6 +100,20 @@ const getAllStoresForCustomerFromDB = async (
 };
 
 const updateStoreIntoDB = async (id: string, payload: Partial<IStore>) => {
+  const isStoreExist = await Store.findById(id);
+  if (!isStoreExist) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Store not found');
+  }
+
+  if (
+    payload.isActive &&
+    (!isStoreExist.stripeAccountId || !isStoreExist.isConnectedAccountReady)
+  ) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Stripe account is not connected. Please connect your stripe account first.',
+    );
+  }
   const result = await Store.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
@@ -180,7 +194,7 @@ const isStoreOpen = (store: IStore): boolean => {
   const currentDay = formatInTimeZone(now, store.timezone, 'EEEE');
   const currentTime = formatInTimeZone(now, store.timezone, 'HH:mm');
 
-  const todaysHours = store.hours.find((h) => h.day === currentDay);
+  const todaysHours = store.hours.find(h => h.day === currentDay);
 
   if (!todaysHours) {
     return false;
@@ -222,7 +236,7 @@ const getAllProductsOfAStoreFromDB = async (
     productsQuery.getPaginationInfo(),
   ]);
 
-  let productsWithFavorite = products.map((product) => ({
+  let productsWithFavorite = products.map(product => ({
     ...product.toObject(),
     isFavorite: false,
   }));
@@ -230,12 +244,12 @@ const getAllProductsOfAStoreFromDB = async (
   if (userId) {
     const favoriteProductIds = await Favorite.find({
       user: userId,
-      product: { $in: products.map((p) => p._id) },
+      product: { $in: products.map(p => p._id) },
     }).distinct('product');
 
-    const favoriteSet = new Set(favoriteProductIds.map((id) => id.toString()));
+    const favoriteSet = new Set(favoriteProductIds.map(id => id.toString()));
 
-    productsWithFavorite = productsWithFavorite.map((product) => ({
+    productsWithFavorite = productsWithFavorite.map(product => ({
       ...product,
       isFavorite: favoriteSet.has(product._id.toString()),
     }));

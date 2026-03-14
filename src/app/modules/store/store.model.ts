@@ -57,7 +57,7 @@ const storeSchema = new Schema<IStore, StoreModel>(
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     isDeleted: {
       type: Boolean,

@@ -16,15 +16,17 @@ const storeHoursValidationSchema = z.object({
 });
 
 const createStoreValidationSchema = z.object({
-  body: z.object({
-    name: z.string({ required_error: 'Store name is required' }),
-    address: z.string({ required_error: 'Address is required' }),
-    latitude: z.string({ required_error: 'Latitude is required' }),
-    longitude: z.string({ required_error: 'Longitude is required' }),
-    phone: z.string({ required_error: 'Phone number is required' }),
-    hours: z.array(storeHoursValidationSchema).optional(),
-    about: z.string().optional(),
-  }),
+  body: z
+    .object({
+      name: z.string({ required_error: 'Store name is required' }),
+      address: z.string({ required_error: 'Address is required' }),
+      latitude: z.string({ required_error: 'Latitude is required' }),
+      longitude: z.string({ required_error: 'Longitude is required' }),
+      phone: z.string({ required_error: 'Phone number is required' }),
+      hours: z.array(storeHoursValidationSchema).optional(),
+      about: z.string().optional(),
+    })
+    .strict(),
 });
 
 const updateStoreValidationSchema = z.object({
