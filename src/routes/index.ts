@@ -21,6 +21,7 @@ import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
 import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
+import { CustomizationOptionRoutes } from '../app/modules/customizationOption/customizationOption.route';
 
 const router = express.Router();
 
@@ -47,6 +48,7 @@ const moduleRoutes = [
   { path: '/favorites', route: favoriteRoutes },
   { path: '/analytics', route: analyticsRoutes },
   { path: '/pointTransactions', route: pointTransactionRoutes },
+  { path: '/customizationOptions', route: CustomizationOptionRoutes },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
