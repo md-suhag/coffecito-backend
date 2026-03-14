@@ -5,6 +5,8 @@ export enum NOTIFICATION_TYPE {
   PAYMENT = 'PAYMENT',
   PROMOTION = 'PROMOTION',
   SYSTEM = 'SYSTEM',
+  DAILY_SPECIAL = 'DAILY_SPECIAL',
+  NEW_DRINK = 'NEW_DRINK',
 }
 
 export type INotification = {

@@ -116,6 +116,18 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getRevenue = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getRevenue(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Revenue fetched successfully',
+    data: result.revenue,
+    pagination: result.meta,
+  });
+});
+
 export const AdminController = {
   createCategory,
   updateCategory,
@@ -126,4 +138,5 @@ export const AdminController = {
   getAllOrders,
   updateOrder,
   createUser,
+  getRevenue,
 };

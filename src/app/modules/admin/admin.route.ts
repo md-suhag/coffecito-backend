@@ -66,4 +66,10 @@ router.post(
   AdminController.createUser,
 );
 
+router.get(
+  '/revenue',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getRevenue,
+);
+
 export const adminRoutes = router;

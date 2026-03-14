@@ -144,6 +144,30 @@ const createUserToDB = async (payload: IUser) => {
   return result;
 };
 
+const getRevenue = async (query: Record<string, any>) => {
+  const ordersQuery = new QueryBuilder(
+    Order.find({
+      paymentStatus: PAYMENT_STATUS.PAID,
+      orderStatus: ORDER_STATUS.COMPLETED,
+    }).select('orderId paymentStatus totalAmount paymentMethod createdAt'),
+    query,
+  )
+    .sort()
+    .paginate()
+    .filter()
+    .search(ORDER_SEARCHABLE_FIELDS);
+
+  const [revenue, meta] = await Promise.all([
+    ordersQuery.modelQuery,
+    ordersQuery.getPaginationInfo(),
+  ]);
+
+  return {
+    revenue,
+    meta,
+  };
+};
+
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
@@ -154,4 +178,5 @@ export const AdminServices = {
   getAllOrdersFromDB,
   updateOrderFromDB,
   createUserToDB,
+  getRevenue,
 };
