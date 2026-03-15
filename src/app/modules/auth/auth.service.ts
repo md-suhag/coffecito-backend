@@ -17,9 +17,12 @@ import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
-import { USER_STATUS } from '../user/user.constant';
+import { AUTH_PROVIDERS, USER_ROLES, USER_STATUS } from '../user/user.constant';
 import { smsTemplate } from '../../../shared/smsTemplate';
 import { smsHelper } from '../../../helpers/smsHelper';
+import { OAuth2Client } from 'google-auth-library';
+import { Customer } from '../customer/customer.model';
+import mongoose from 'mongoose';
 
 //------------------ login service ------------------
 const loginUserFromDB = async (payload: ILoginData) => {
@@ -59,7 +62,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
   }
 
   //check match password
-  if (!(await User.isMatchPassword(password, isExistUser?.password))) {
+  if (!(await User.isMatchPassword(password, isExistUser?.password ?? ''))) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       config.node_env === 'development'
@@ -412,6 +415,125 @@ const changePasswordToDB = async (
   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
 };
 
+const googleClient = new OAuth2Client(config.social.google_client_id);
+
+//google login
+const googleLogin = async (idToken: string) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: config.social.google_client_id,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid Google token');
+  }
+
+  if (!payload.email || !payload.email_verified) {
+    throw new ApiError(
+      StatusCodes.UNAUTHORIZED,
+      'Unable to authenticate with Google',
+    );
+  }
+
+  const { email, name, picture, sub } = payload;
+
+  const existingUser = await User.findOne({ email });
+
+  // Prevent Google ID mismatch
+  if (existingUser?.googleId && existingUser.googleId !== sub) {
+    throw new ApiError(
+      StatusCodes.UNAUTHORIZED,
+      'Unable to authenticate with Google',
+    );
+  }
+
+  // Existing user flow
+  if (existingUser) {
+    if (
+      !existingUser.googleId &&
+      (existingUser.authProviders ?? []).includes(AUTH_PROVIDERS.LOCAL)
+    ) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        'This account was created using email and password. Please sign in using that method.',
+      );
+    }
+
+    const accessToken = jwtHelper.createToken(
+      {
+        id: existingUser._id,
+        role: existingUser.role,
+        email: existingUser.email,
+      },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.jwt_expire_in as string,
+    );
+
+    return { accessToken };
+  }
+
+  // Transaction for new user creation
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const newUser = await User.create(
+      [
+        {
+          email,
+          name,
+          profileImage: picture,
+          role: USER_ROLES.CUSTOMER,
+          authProviders: [AUTH_PROVIDERS.GOOGLE],
+          isVerified: true,
+          isEmailVerified: true,
+          googleId: sub,
+        },
+      ],
+      { session },
+    );
+
+    const customer = await Customer.create(
+      [
+        {
+          user: newUser[0]._id,
+        },
+      ],
+      { session },
+    );
+
+    await User.findByIdAndUpdate(
+      newUser[0]._id,
+      { customer: customer[0]._id },
+      { session },
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    const accessToken = jwtHelper.createToken(
+      {
+        id: newUser[0]._id,
+        role: newUser[0].role,
+        email: newUser[0].email,
+      },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.jwt_expire_in as string,
+    );
+
+    return {
+      user: newUser[0],
+      accessToken,
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+};
+
 export const AuthService = {
   verifyEmailToDB,
   verifyPhoneToDB,
@@ -421,4 +543,5 @@ export const AuthService = {
   changePasswordToDB,
   resendVerificationEmailToDB,
   resendVerificationPhoneOtpToDB,
+  googleLogin,
 };

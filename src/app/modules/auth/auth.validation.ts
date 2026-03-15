@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { USER_ROLES } from '../user/user.constant';
 
 const createLoginZodSchema = z.object({
   body: z.object({
@@ -94,6 +95,12 @@ const createChangePasswordZodSchema = z.object({
   }),
 });
 
+const googleLoginZodSchema = z.object({
+  body: z.object({
+    idToken: z.string({ required_error: 'ID token is required' }),
+  }),
+});
+
 export const AuthValidation = {
   createVerifyEmailZodSchema,
   createVerifyPhoneZodSchema,
@@ -103,4 +110,5 @@ export const AuthValidation = {
   createChangePasswordZodSchema,
   resendEmailOtpZodSchema,
   resendPhoneOtpZodSchema,
+  googleLoginZodSchema,
 };

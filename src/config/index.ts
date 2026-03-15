@@ -42,4 +42,7 @@ export default {
   firebase: {
     serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
   },
+  social: {
+    google_client_id: process.env.GOOGLE_CLIENT_ID,
+  },
 };

@@ -54,4 +54,10 @@ router.post(
   AuthController.changePassword,
 );
 
+router.post(
+  '/google',
+  validateRequest(AuthValidation.googleLoginZodSchema),
+  AuthController.googleLogin,
+);
+
 export const AuthRoutes = router;

@@ -105,6 +105,18 @@ const resendVerificationPhone = catchAsync(
     });
   },
 );
+
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+  const result = await AuthService.googleLogin(idToken);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'User logged in successfully.',
+    data: result,
+  });
+});
 export const AuthController = {
   verifyEmail,
   verifyPhone,
@@ -114,4 +126,5 @@ export const AuthController = {
   changePassword,
   resendVerificationEmail,
   resendVerificationPhone,
+  googleLogin,
 };
