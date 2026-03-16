@@ -18,6 +18,8 @@ import { IUser } from '../user/user.interface';
 import { EmailSubscription } from '../emailSubscription/emailSubscription.model';
 import { Order } from '../order/order.model';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../order/order.constants';
+import { NotificationHelper } from '../../../helpers/notificationHelper';
+import { NOTIFICATION_TYPE } from '../notification/notification.interface';
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -136,6 +138,17 @@ const updateOrderFromDB = async (id: string, payload: ORDER_STATUS) => {
       runValidators: true,
     },
   );
+
+  if (payload === ORDER_STATUS.READY) {
+    await NotificationHelper.sendAndSaveNotification({
+      receiver: isExistOrder.customer.toString(),
+      title: 'Order is Ready! ☕',
+      message: `Your order ${isExistOrder.orderId} is ready for pickup. Come and get it!`,
+      type: NOTIFICATION_TYPE.ORDER,
+      data: { orderId: isExistOrder._id.toString() },
+    });
+  }
+
   return result;
 };
 
