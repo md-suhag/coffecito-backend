@@ -1,6 +1,6 @@
-# Backend Template for TypeScript, Express and Mongoose
+# Coffee App Backend
 
-This is a template project for backend development using Typescript, Node.js, Express, Mongoose, Bcrypt, JWT, NodeMailer, Multer, ESLint, and Prettier. The aim is to reduce setup time for new backend projects.
+This is a backend project for a coffee shop application using Typescript, Node.js, Express, Mongoose, Bcrypt, JWT, NodeMailer, Multer, ESLint, and Prettier. The aim is to reduce setup time for new backend projects.
 
 ## Features
 
@@ -47,8 +47,8 @@ Ensure you have the following installed:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/md-suhag/backend-template-typescript-mongoose-express.git
-   cd backend-template-typescript-mongoose-express
+   git clone https://github.com/md-suhag/coffecito-backend.git
+   cd coffecito-backend
    ```
 
 2. **Install dependencies:**
