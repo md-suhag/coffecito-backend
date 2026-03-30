@@ -29,7 +29,7 @@ const getSummaryCardsData = async () => {
       Order.aggregate([
         {
           $match: {
-            status: ORDER_STATUS.COMPLETED,
+            orderStatus: ORDER_STATUS.COMPLETED,
             paymentStatus: PAYMENT_STATUS.PAID,
           },
         },
@@ -56,7 +56,7 @@ const getRevenueByMonth = async (year?: number) => {
   const revenueData = await Order.aggregate([
     {
       $match: {
-        status: ORDER_STATUS.COMPLETED,
+        orderStatus: ORDER_STATUS.COMPLETED,
         paymentStatus: PAYMENT_STATUS.PAID,
         createdAt: {
           $gte: new Date(`${selectedYear}-01-01`),
@@ -121,7 +121,7 @@ const getOrdersByCategory = async (
   const categoryData = await Order.aggregate([
     {
       $match: {
-        status: ORDER_STATUS.COMPLETED,
+        orderStatus: ORDER_STATUS.COMPLETED,
         paymentStatus: PAYMENT_STATUS.PAID,
         createdAt: { $gte: startDate },
       },

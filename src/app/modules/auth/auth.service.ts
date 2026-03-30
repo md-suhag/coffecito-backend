@@ -78,7 +78,16 @@ const loginUserFromDB = async (payload: ILoginData) => {
     config.jwt.jwt_expire_in as string,
   );
 
-  return { accessToken, role: isExistUser.role };
+  const lsLocationAdded =
+    isExistUser?.location?.latitude && isExistUser?.location?.longitude
+      ? true
+      : false;
+  return {
+    accessToken,
+    role: isExistUser.role,
+    isPhoneVerified: isExistUser.isPhoneVerified,
+    lsLocationAdded,
+  };
 };
 
 //forget password
@@ -166,6 +175,12 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       },
     );
     message = 'Email verify successfully';
+
+    data = jwtHelper.createToken(
+      { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.jwt_expire_in as string,
+    );
   } else {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
