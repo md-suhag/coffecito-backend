@@ -12,7 +12,7 @@ const updateCategoryZodSchema = z.object({
   body: z.object({
     name: z.string().optional(),
     isActive: z.boolean().optional(),
-    isDeleted: z.boolean().optional(),
+    // isDeleted: z.boolean().optional(),
   }),
 });
 

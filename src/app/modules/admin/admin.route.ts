@@ -14,11 +14,23 @@ router.post(
   AdminController.createCategory,
 );
 
+router.get(
+  '/categories',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getAllCategories,
+);
+
 router.patch(
   '/categories/:id',
   auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   validateRequest(AdminValidations.updateCategoryZodSchema),
   AdminController.updateCategory,
+);
+
+router.delete(
+  '/categories/:id/soft',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.softDeleteCategory,
 );
 
 router.post(

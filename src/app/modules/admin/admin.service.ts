@@ -10,6 +10,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { User } from '../user/user.model';
 import { USER_ROLES } from '../user/user.constant';
 import {
+  CATEGORY_SEARCHABLE_FIELDS,
   EMAIL_SUBSCRIBER_SEARCHABLE_FIELDS,
   ORDER_SEARCHABLE_FIELDS,
   USER_SEARCHABLE_FIELDS,
@@ -20,6 +21,20 @@ import { Order } from '../order/order.model';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../order/order.constants';
 import { NotificationHelper } from '../../../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../notification/notification.interface';
+
+const getAllCategoriesFromDB = async (query: Record<string, any>) => {
+  const categoriesQuery = new QueryBuilder(Category.find(), query)
+    .sort()
+    .paginate()
+    .search(CATEGORY_SEARCHABLE_FIELDS);
+
+  const [categories, meta] = await Promise.all([
+    categoriesQuery.modelQuery,
+    categoriesQuery.getPaginationInfo(),
+  ]);
+
+  return { categories, meta };
+};
 
 const createCategoryToDB = async (payload: Partial<ICategory>) => {
   const result = await Category.create(payload);
@@ -35,6 +50,22 @@ const updateCategoryToDB = async (id: string, payload: Partial<ICategory>) => {
     new: true,
     runValidators: true,
   });
+  return result;
+};
+
+const softDeleteCategoryFromDB = async (id: string) => {
+  const isExistCategory = await Category.findById(id);
+  if (!isExistCategory) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Category doesn't exist!");
+  }
+  const result = await Category.findOneAndUpdate(
+    { _id: id },
+    { isDeleted: true },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
   return result;
 };
 
@@ -100,7 +131,16 @@ const getAllOrdersFromDB = async (query: Record<string, any>) => {
   const ordersQuery = new QueryBuilder(
     Order.find({
       paymentStatus: PAYMENT_STATUS.PAID,
-    }),
+    }).populate([
+      {
+        path: 'customer',
+        select: 'name email phone address ',
+      },
+      {
+        path: 'store',
+        select: 'name address',
+      },
+    ]),
     query,
   )
     .sort()
@@ -192,4 +232,6 @@ export const AdminServices = {
   updateOrderFromDB,
   createUserToDB,
   getRevenue,
+  getAllCategoriesFromDB,
+  softDeleteCategoryFromDB,
 };

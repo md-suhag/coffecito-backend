@@ -23,10 +23,13 @@ const categorySchema = new Schema<ICategory, CategoryModel>(
   },
 );
 
-categorySchema.pre<Query<ICategory, ICategory>>(/^find/, function (next) {
-  this.find({ isDeleted: false });
-  next();
-});
+categorySchema.pre<Query<ICategory, ICategory>>(
+  /^find|^count/,
+  function (next) {
+    this.find({ isDeleted: false });
+    next();
+  },
+);
 
 export const Category = model<ICategory, CategoryModel>(
   'Category',

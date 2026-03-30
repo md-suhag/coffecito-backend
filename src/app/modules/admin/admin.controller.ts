@@ -5,6 +5,18 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import { AUTH_PROVIDERS } from '../user/user.constant';
 
+const getAllCategories = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getAllCategoriesFromDB(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Categories fetched successfully',
+    data: result.categories,
+    pagination: result.meta,
+  });
+});
+
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminServices.createCategoryToDB(req.body);
 
@@ -24,6 +36,18 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Category updated successfully',
+    data: result,
+  });
+});
+
+const softDeleteCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AdminServices.softDeleteCategoryFromDB(id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Category deleted successfully',
     data: result,
   });
 });
@@ -139,4 +163,6 @@ export const AdminController = {
   updateOrder,
   createUser,
   getRevenue,
+  getAllCategories,
+  softDeleteCategory,
 };
