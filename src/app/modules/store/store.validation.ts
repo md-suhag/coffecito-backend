@@ -3,17 +3,17 @@ import { STORE_OPEN_DAY } from './store.constants';
 
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-const storeHoursValidationSchema = z.object({
-  day: z.nativeEnum(STORE_OPEN_DAY, {
-    required_error: 'Day is required',
-  }),
-  open: z
-    .string({ required_error: 'Open time is required' })
-    .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format'),
-  close: z
-    .string({ required_error: 'Close time is required' })
-    .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format'),
-});
+// const storeHoursValidationSchema = z.object({
+//   day: z.nativeEnum(STORE_OPEN_DAY, {
+//     required_error: 'Day is required',
+//   }),
+//   open: z
+//     .string({ required_error: 'Open time is required' })
+//     .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format'),
+//   close: z
+//     .string({ required_error: 'Close time is required' })
+//     .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format'),
+// });
 
 const createStoreValidationSchema = z.object({
   body: z
@@ -23,7 +23,17 @@ const createStoreValidationSchema = z.object({
       latitude: z.string({ required_error: 'Latitude is required' }),
       longitude: z.string({ required_error: 'Longitude is required' }),
       phone: z.string({ required_error: 'Phone number is required' }),
-      hours: z.array(storeHoursValidationSchema).optional(),
+      // hours: z.array(storeHoursValidationSchema).optional(),
+      openTime: z
+        .string()
+        .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format')
+        .optional(),
+      closeTime: z
+        .string()
+        .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format')
+        .optional(),
+
+      offDay: z.nativeEnum(STORE_OPEN_DAY).optional(),
       about: z.string().optional(),
     })
     .strict(),
@@ -36,7 +46,16 @@ const updateStoreValidationSchema = z.object({
     latitude: z.string().optional(),
     longitude: z.string().optional(),
     phone: z.string().optional(),
-    hours: z.array(storeHoursValidationSchema).optional(),
+    // hours: z.array(storeHoursValidationSchema).optional(),
+    openTime: z
+      .string()
+      .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format')
+      .optional(),
+    closeTime: z
+      .string()
+      .regex(timeRegex, 'Invalid time format. Use HH:MM in 24-hour format')
+      .optional(),
+    offDay: z.nativeEnum(STORE_OPEN_DAY).optional(),
     about: z.string().optional(),
     isActive: z.boolean().optional(),
   }),

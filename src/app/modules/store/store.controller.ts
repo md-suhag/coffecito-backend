@@ -4,12 +4,48 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { getSingleFilePath } from '../../../shared/getFilePath';
+import { STORE_OPEN_DAY } from './store.constants';
+
+const generateHoursData = (
+  openTime?: string,
+  closeTime?: string,
+  offDay?: string,
+) => {
+  const ALL_DAYS = [
+    STORE_OPEN_DAY.MONDAY,
+    STORE_OPEN_DAY.TUESDAY,
+    STORE_OPEN_DAY.WEDNESDAY,
+    STORE_OPEN_DAY.THURSDAY,
+    STORE_OPEN_DAY.FRIDAY,
+    STORE_OPEN_DAY.SATURDAY,
+    STORE_OPEN_DAY.SUNDAY,
+  ];
+
+  let hours: any[] = [];
+
+  if (openTime && closeTime) {
+    const formatOffDay: string[] = Array.isArray(offDay) ? offDay : [];
+    hours = ALL_DAYS.map(day => ({
+      day,
+      open: formatOffDay.includes(day) ? null : openTime,
+      close: formatOffDay.includes(day) ? null : closeTime,
+    }));
+  }
+
+  return hours;
+};
 
 const createStore = catchAsync(async (req: Request, res: Response) => {
   let image = getSingleFilePath(req.files, 'image');
 
+  const hours = generateHoursData(
+    req.body.openTime,
+    req.body.closeTime,
+    req.body.offDay,
+  );
   const data = {
     image,
+    hours,
     ...req.body,
     location: {
       type: 'Point',
@@ -31,8 +67,15 @@ const updateStore = catchAsync(async (req: Request, res: Response) => {
 
   let image = getSingleFilePath(req.files, 'image');
 
+  const hours = generateHoursData(
+    req.body.openTime,
+    req.body.closeTime,
+    req.body.offDay,
+  );
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = image ? { image, ...req.body } : { ...req.body };
+  const data: any = image
+    ? { image, hours, ...req.body }
+    : { hours, ...req.body };
 
   if (req.body.longitude && req.body.latitude) {
     data.location = {
