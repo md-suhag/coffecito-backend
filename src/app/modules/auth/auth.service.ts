@@ -214,6 +214,10 @@ const verifyPhoneToDB = async (payload: IVerifyPhone) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
+
+  if (isExistUser.isPhoneVerified) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Phone number already verified');
+  }
   if (!isExistUser.authentication?.oneTimeCode) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,

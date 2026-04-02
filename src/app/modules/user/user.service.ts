@@ -93,7 +93,7 @@ const getSingleUserFromDB = async (id: string): Promise<Partial<IUser>> => {
 const updateProfileToDB = async (
   user: JwtPayload,
   payload: Partial<IUser> & { isOnboard?: boolean },
-): Promise<Partial<IUser | null>> => {
+) => {
   const { id } = user;
   const isExistUser = await User.isExistUserById(id);
   if (!isExistUser) {
@@ -103,6 +103,27 @@ const updateProfileToDB = async (
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       'Phone already verified! you can not update phone number',
+    );
+  }
+
+  // check if phone already exists and verified for another user
+  if (payload.phone) {
+    const isPhoneExist = await User.findOne({
+      phone: payload.phone,
+      isPhoneVerified: true,
+      _id: { $ne: id },
+    });
+    if (isPhoneExist) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Phone number already in use by another account',
+      );
+    }
+
+    // clear from others who are unverified
+    await User.updateMany(
+      { phone: payload.phone, isPhoneVerified: false, _id: { $ne: id } },
+      { $set: { phone: null } },
     );
   }
 
@@ -122,6 +143,7 @@ const updateProfileToDB = async (
     new: true,
   });
 
+  let tempOtp;
   // Check if we need to send OTP (phone provided, not verified, and it's onboarding flow)
   if (
     updatePayload?.phone &&
@@ -129,6 +151,7 @@ const updateProfileToDB = async (
     isOnboard
   ) {
     const otp = generateOTP();
+    tempOtp = otp;
     const otpTemplate = smsTemplate.sendOtpToPhone({
       otp,
       phone: updatePayload.phone,
@@ -150,7 +173,7 @@ const updateProfileToDB = async (
     );
   }
 
-  return updateDoc;
+  return { ...updateDoc?.toJSON(), otp: tempOtp };
 };
 
 const getMyLoyaltyPointsFromDB = async (id: string) => {
