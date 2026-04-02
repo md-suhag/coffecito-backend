@@ -100,7 +100,7 @@ const getAllSubscribers = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllOrders = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminServices.getAllOrdersFromDB(req.query);
+  const result = await AdminServices.getAllOrdersFromDB(req.query, req.user);
 
   sendResponse(res, {
     success: true,

@@ -21,6 +21,7 @@ import { Order } from '../order/order.model';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../order/order.constants';
 import { NotificationHelper } from '../../../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../notification/notification.interface';
+import { JwtPayload } from 'jsonwebtoken';
 
 const getAllCategoriesFromDB = async (query: Record<string, any>) => {
   const categoriesQuery = new QueryBuilder(Category.find(), query)
@@ -127,7 +128,17 @@ const getAllSubscribers = async (query: Record<string, any>) => {
   };
 };
 
-const getAllOrdersFromDB = async (query: Record<string, any>) => {
+const getAllOrdersFromDB = async (
+  query: Record<string, any>,
+  user: JwtPayload,
+) => {
+  const queryObj = { ...query };
+
+  // If user is not super_admin and has a store assigned, restrict to that store
+  if (user?.role !== 'super_admin' && user?.store) {
+    queryObj.store = user.store;
+  }
+
   const ordersQuery = new QueryBuilder(
     Order.find({
       paymentStatus: PAYMENT_STATUS.PAID,
@@ -141,7 +152,7 @@ const getAllOrdersFromDB = async (query: Record<string, any>) => {
         select: 'name address',
       },
     ]),
-    query,
+    queryObj,
   )
     .sort()
     .paginate()
