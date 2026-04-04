@@ -48,6 +48,9 @@ const storeSchema = new Schema<IStore, StoreModel>(
     hours: {
       type: [hoursSchema],
     },
+    offDay: {
+      type: String,
+    },
     stripeAccountId: {
       type: String,
     },

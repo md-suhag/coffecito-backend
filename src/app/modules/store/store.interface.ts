@@ -17,6 +17,7 @@ export type IStore = {
   };
   phone: string;
   hours: IStoreHours[];
+  offDay: STORE_OPEN_DAY;
   stripeAccountId?: string;
   isConnectedAccountReady?: boolean;
   isActive: boolean;
