@@ -215,6 +215,9 @@ const getAllProductsOfAStoreFromDB = async (
   query: Record<string, unknown>,
   userId?: string,
 ) => {
+  if (query.category === 'all') {
+    delete query.category;
+  }
   const store = await Store.findById(id);
   if (!store) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Store not found');
