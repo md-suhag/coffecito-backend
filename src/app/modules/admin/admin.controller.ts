@@ -140,6 +140,18 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllCreatedUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminServices.getAllCreatedUsersFromDB(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users fetched successfully',
+    data: result.users,
+    pagination: result.meta,
+  });
+});
+
 const getRevenue = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminServices.getRevenue(req.query);
 
@@ -165,4 +177,5 @@ export const AdminController = {
   getRevenue,
   getAllCategories,
   softDeleteCategory,
+  getAllCreatedUsers,
 };

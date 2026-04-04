@@ -208,6 +208,27 @@ const createUserToDB = async (payload: IUser) => {
   return result;
 };
 
+const getAllCreatedUsersFromDB = async (query: Record<string, any>) => {
+  const usersQuery = new QueryBuilder(
+    User.find({
+      role: {
+        $in: [USER_ROLES.ADMIN, USER_ROLES.BARISTA, USER_ROLES.MARKETER],
+      },
+    }),
+    query,
+  )
+    .sort()
+    .paginate()
+    .search(USER_SEARCHABLE_FIELDS);
+
+  const [users, meta] = await Promise.all([
+    usersQuery.modelQuery,
+    usersQuery.getPaginationInfo(),
+  ]);
+
+  return { users, meta };
+};
+
 const getRevenue = async (query: Record<string, any>) => {
   const ordersQuery = new QueryBuilder(
     Order.find({
@@ -245,4 +266,5 @@ export const AdminServices = {
   getRevenue,
   getAllCategoriesFromDB,
   softDeleteCategoryFromDB,
+  getAllCreatedUsersFromDB,
 };

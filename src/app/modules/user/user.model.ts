@@ -180,4 +180,9 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre(/^find|^count/, function (this: any, next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
 export const User = model<IUser, UserModal>('User', userSchema);

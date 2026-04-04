@@ -79,6 +79,12 @@ router.post(
 );
 
 router.get(
+  '/controllers',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AdminController.getAllCreatedUsers,
+);
+
+router.get(
   '/revenue',
   auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   AdminController.getRevenue,
