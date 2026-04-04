@@ -22,6 +22,7 @@ import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
 import { storeAdminRoutes } from '../app/modules/store/store.admin.route';
 import { CustomizationOptionRoutes } from '../app/modules/customizationOption/customizationOption.route';
+import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ const moduleRoutes = [
   { path: '/analytics', route: analyticsRoutes },
   { path: '/pointTransactions', route: pointTransactionRoutes },
   { path: '/customizationOptions', route: CustomizationOptionRoutes },
+  { path: '/disclaimers', route: DisclaimerRoutes },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));

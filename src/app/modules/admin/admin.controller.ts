@@ -4,6 +4,7 @@ import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import { AUTH_PROVIDERS } from '../user/user.constant';
+import { getSingleFilePath } from '../../../shared/getFilePath';
 
 const getAllCategories = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminServices.getAllCategoriesFromDB(req.query);
@@ -164,6 +165,23 @@ const getRevenue = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+  let profileImage = getSingleFilePath(req.files, 'image');
+
+  const data = {
+    profileImage,
+
+    ...req.body,
+  };
+  const result = await AdminServices.updateUser(data, req.user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'User updated successfully',
+    data: result,
+  });
+});
 export const AdminController = {
   createCategory,
   updateCategory,
@@ -178,4 +196,5 @@ export const AdminController = {
   getAllCategories,
   softDeleteCategory,
   getAllCreatedUsers,
+  updateUser,
 };

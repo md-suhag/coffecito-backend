@@ -4,6 +4,7 @@ import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../user/user.constant';
 import validateRequest from '../../middlewares/validateRequest';
 import { AdminValidations } from './admin.validation';
+import fileUploadHandler from '../../middlewares/fileUploadHandler';
 
 const router = express.Router();
 
@@ -88,6 +89,19 @@ router.get(
   '/revenue',
   auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   AdminController.getRevenue,
+);
+
+router.patch(
+  '/profile',
+  auth(
+    USER_ROLES.ADMIN,
+    USER_ROLES.SUPER_ADMIN,
+    USER_ROLES.BARISTA,
+    USER_ROLES.MARKETER,
+  ),
+  fileUploadHandler(),
+  validateRequest(AdminValidations.updateUserZodSchema),
+  AdminController.updateUser,
 );
 
 export const adminRoutes = router;

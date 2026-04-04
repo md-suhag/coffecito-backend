@@ -253,6 +253,17 @@ const getRevenue = async (query: Record<string, any>) => {
   };
 };
 
+const updateUser = async (payload: IUser, user: JwtPayload) => {
+  const isExistUser = await User.findById(user.id);
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+  const result = await User.findOneAndUpdate({ _id: user.id }, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
 export const AdminServices = {
   createCategoryToDB,
   updateCategoryToDB,
@@ -267,4 +278,5 @@ export const AdminServices = {
   getAllCategoriesFromDB,
   softDeleteCategoryFromDB,
   getAllCreatedUsersFromDB,
+  updateUser,
 };
