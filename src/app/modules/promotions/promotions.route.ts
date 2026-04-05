@@ -18,7 +18,11 @@ router.post(
 
 router.get('/', PromotionsController.getActivePromotions);
 
-router.get('/admin', PromotionsController.getAllPromotions);
+router.get(
+  '/admin',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MARKETER),
+  PromotionsController.getAllPromotions,
+);
 
 router.patch(
   '/:id/status',
