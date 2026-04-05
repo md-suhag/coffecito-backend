@@ -55,8 +55,8 @@ const createGiftCard = async (payload: any, user: JwtPayload) => {
       },
     },
     mode: 'payment',
-    success_url: `${config.website_url}/gift-card?payment=success`,
-    cancel_url: `${config.website_url}/gift-card?payment=cancel`,
+    success_url: `${config.website_url}/gift-card/success`,
+    cancel_url: `${config.website_url}/gift-card/cancel`,
   });
 
   return { checkoutUrl: session.url };
