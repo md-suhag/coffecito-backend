@@ -628,7 +628,7 @@ const getMyOrderDetailsFromDB = async (userId: string, orderId: string) => {
     _id: orderId,
     customer: userId,
   })
-    .populate('store', 'name location address')
+    .populate('store', 'name location address image')
     .populate('items.product', 'image readyTime');
 
   if (!order) {
@@ -675,6 +675,7 @@ const getMyOrderDetailsFromDB = async (userId: string, orderId: string) => {
       id: order.store?._id,
       name: (order.store as any)?.name,
       address: (order.store as any)?.address,
+      image: (order.store as any)?.image,
       distanceKm: distanceKm ? Number(distanceKm.toFixed(1)) : null,
     },
 
