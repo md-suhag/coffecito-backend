@@ -432,6 +432,7 @@ const createOrderIntoDB = async (
         orderIds[0],
         dbSession,
       );
+    } else if (payload.paymentMethod === PAYMENT_METHOD.STRIPE) {
       const internalTransactionIdStripe = await generateSecureId(
         'OTXN-',
         Order,
