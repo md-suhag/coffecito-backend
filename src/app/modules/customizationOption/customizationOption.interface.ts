@@ -3,8 +3,12 @@ import { CUSTOMIZATION_OPTION_TYPE } from './customizationOption.constants';
 
 export type ICustomizationOption = {
   name: string;
-  price: number;
   type: CUSTOMIZATION_OPTION_TYPE;
+  isRequired: boolean;
+  options: {
+    label: string;
+    price: number;
+  }[];
   status: boolean;
   isDeleted: boolean;
 };

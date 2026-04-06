@@ -180,22 +180,6 @@ const createOrderIntoDB = async (
       // Deduct points from customer immediately since it's validated
       customerRecord.loyaltyPoints -= pointsToDeduct;
       await customerRecord.save({ session: dbSession });
-
-      // Record point deduction transaction
-      await PointTransactionServices.createTransaction(
-        {
-          user: userId as any,
-          pointsChange: -pointsToDeduct,
-          type: POINT_TRANSACTION_TYPE.SPEND,
-          balanceAfter: customerRecord.loyaltyPoints,
-          transactionId: await generateSecureId(
-            'PTXN-',
-            PointTransaction,
-            'transactionId',
-          ),
-        },
-        dbSession,
-      );
     }
 
     const totalOrderSubtotal = storeIds.reduce(
@@ -248,6 +232,25 @@ const createOrderIntoDB = async (
       session: dbSession,
     });
     const orderIds = createdOrders.map(o => o._id.toString());
+
+    // Record point deduction transaction now that we have order IDs
+    if (pointsToDeduct > 0) {
+      await PointTransactionServices.createTransaction(
+        {
+          user: userId as any,
+          pointsChange: -pointsToDeduct,
+          type: POINT_TRANSACTION_TYPE.SPEND,
+          balanceAfter: customerRecord.loyaltyPoints,
+          relatedOrderId: createdOrders[0]._id, // Link to the first order of the batch
+          transactionId: await generateSecureId(
+            'PTXN-',
+            PointTransaction,
+            'transactionId',
+          ),
+        },
+        dbSession,
+      );
+    }
 
     // 5. Handle Specific Payment Methods
     let paymentResult: any = {};

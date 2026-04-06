@@ -64,10 +64,69 @@ const deleteCustomizationOptionFromDB = async (id: string) => {
   return result;
 };
 
+const addOptionToCategoryInDB = async (
+  id: string,
+  payload: { label: string; price: number },
+) => {
+  const result = await CustomizationOption.findByIdAndUpdate(
+    id,
+    {
+      $push: { options: payload },
+    },
+    { new: true, runValidators: true },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customization category not found');
+  }
+  return result;
+};
+
+const updateOptionInCategoryInDB = async (
+  id: string,
+  optionId: string,
+  payload: { label?: string; price?: number },
+) => {
+  const updateData: any = {};
+  if (payload.label) updateData['options.$.label'] = payload.label;
+  if (payload.price !== undefined) updateData['options.$.price'] = payload.price;
+
+  const result = await CustomizationOption.findOneAndUpdate(
+    { _id: id, 'options._id': optionId },
+    {
+      $set: updateData,
+    },
+    { new: true, runValidators: true },
+  );
+  if (!result) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'Customization category or option not found',
+    );
+  }
+  return result;
+};
+
+const removeOptionFromCategoryFromDB = async (id: string, optionId: string) => {
+  const result = await CustomizationOption.findByIdAndUpdate(
+    id,
+    {
+      $pull: { options: { _id: optionId } },
+    },
+    { new: true },
+  );
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Customization category not found');
+  }
+  return result;
+};
+
 export const CustomizationOptionServices = {
   createCustomizationOptionIntoDB,
   getAllCustomizationOptionsFromDB,
   getSingleCustomizationOptionFromDB,
   updateCustomizationOptionIntoDB,
   deleteCustomizationOptionFromDB,
+  addOptionToCategoryInDB,
+  updateOptionInCategoryInDB,
+  removeOptionFromCategoryFromDB,
 };

@@ -15,15 +15,27 @@ const customizationOptionSchema = new Schema<
       required: true,
       trim: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
     type: {
       type: String,
       enum: Object.values(CUSTOMIZATION_OPTION_TYPE),
       required: true,
     },
+    isRequired: {
+      type: Boolean,
+      default: false,
+    },
+    options: [
+      {
+        label: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
     status: {
       type: Boolean,
       default: true,

@@ -2,10 +2,32 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { PRODUCT_SEARCHABLE_FIELDS } from './product.constants';
 import { IProduct } from './product.interface';
 import { Product } from './product.model';
-
 import { Favorite } from '../favorite/favorite.model';
+import { CustomizationOption } from '../customizationOption/customizationOption.model';
 
-const createProductIntoDB = async (payload: IProduct) => {
+const createProductIntoDB = async (
+  payload: IProduct & { customizationIds?: string[] },
+) => {
+  if (payload.customizationIds && payload.customizationIds.length > 0) {
+    const customizationTemplates = await CustomizationOption.find({
+      _id: { $in: payload.customizationIds },
+    });
+
+    const customizations = customizationTemplates.map(template => ({
+      name: template.name,
+      type: template.type as any,
+      isRequired: template.isRequired,
+      options: template.options.map(opt => ({
+        label: opt.label,
+        price: opt.price,
+      })),
+    }));
+
+    payload.customizations = [
+      ...(payload.customizations || []),
+      ...customizations,
+    ];
+  }
   const result = await Product.create(payload);
   return result;
 };
@@ -41,7 +63,31 @@ const getAllProductsFromDB = async (
   };
 };
 
-const updateProductIntoDB = async (id: string, payload: Partial<IProduct>) => {
+const updateProductIntoDB = async (
+  id: string,
+  payload: Partial<IProduct> & { customizationIds?: string[] },
+) => {
+  if (payload.customizationIds && payload.customizationIds.length > 0) {
+    const customizationTemplates = await CustomizationOption.find({
+      _id: { $in: payload.customizationIds },
+    });
+
+    const customizations = customizationTemplates.map(template => ({
+      name: template.name,
+      type: template.type as any,
+      isRequired: template.isRequired,
+      options: template.options.map(opt => ({
+        label: opt.label,
+        price: opt.price,
+      })),
+    }));
+
+    payload.customizations = [
+      ...(payload.customizations || []),
+      ...customizations,
+    ];
+  }
+
   const result = await Product.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,

@@ -81,10 +81,60 @@ const deleteCustomizationOption = catchAsync(
   },
 );
 
+const addOptionToCategory = catchAsync(async (req: Request, res: Response) => {
+  const result = await CustomizationOptionServices.addOptionToCategoryInDB(
+    req.params.id,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Option added successfully',
+    data: result,
+  });
+});
+
+const updateOptionInCategory = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await CustomizationOptionServices.updateOptionInCategoryInDB(
+      req.params.id,
+      req.params.optionId,
+      req.body,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Option updated successfully',
+      data: result,
+    });
+  },
+);
+
+const removeOptionFromCategory = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await CustomizationOptionServices.removeOptionFromCategoryFromDB(
+      req.params.id,
+      req.params.optionId,
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Option removed successfully',
+      data: result,
+    });
+  },
+);
+
 export const CustomizationOptionController = {
   createCustomizationOption,
   getAllCustomizationOptions,
   getSingleCustomizationOption,
   updateCustomizationOption,
   deleteCustomizationOption,
+  addOptionToCategory,
+  updateOptionInCategory,
+  removeOptionFromCategory,
 };

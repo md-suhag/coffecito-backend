@@ -43,4 +43,25 @@ router.delete(
   CustomizationOptionController.deleteCustomizationOption,
 );
 
+// Granular Option Management
+router.post(
+  '/:id/options',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.STORE_OWNER),
+  validateRequest(CustomizationOptionValidations.addOptionValidationSchema),
+  CustomizationOptionController.addOptionToCategory,
+);
+
+router.patch(
+  '/:id/options/:optionId',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.STORE_OWNER),
+  validateRequest(CustomizationOptionValidations.updateOptionValidationSchema),
+  CustomizationOptionController.updateOptionInCategory,
+);
+
+router.delete(
+  '/:id/options/:optionId',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.STORE_OWNER),
+  CustomizationOptionController.removeOptionFromCategory,
+);
+
 export const CustomizationOptionRoutes = router;

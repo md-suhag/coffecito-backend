@@ -25,6 +25,7 @@ const createProductValidationSchema = z.object({
     }),
     category: z.string({ required_error: 'Category ID is required' }),
     basePrice: z.number({ required_error: 'Base price is required' }).min(0),
+    customizationIds: z.array(z.string()).optional(),
     customizations: z.array(customizationValidationSchema).optional(),
     dietaryLabels: z.array(z.string()).optional(),
     readyTime: z.number().min(0).optional(),
