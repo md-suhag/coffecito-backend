@@ -32,8 +32,8 @@ const addMoneyIntoWallet = async (amount: number, user: JwtPayload) => {
       },
     },
     mode: 'payment',
-    success_url: `${config.website_url}/wallet?payment=success`,
-    cancel_url: `${config.website_url}/wallet?payment=cancel`,
+    success_url: `${config.website_url}/wallet/success`,
+    cancel_url: `${config.website_url}/wallet/cancel`,
   });
 
   return { checkoutUrl: session.url };

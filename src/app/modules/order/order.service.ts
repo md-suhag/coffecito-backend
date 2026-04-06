@@ -450,8 +450,8 @@ const createOrderIntoDB = async (
             quantity: 1,
           },
         ],
-        success_url: `${config.website_url}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.website_url}/payment-cancel`,
+        success_url: `${config.website_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.website_url}/payment/cancel`,
         metadata: {
           type: 'order_payment',
           userId,
