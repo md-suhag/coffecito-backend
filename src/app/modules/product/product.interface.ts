@@ -1,16 +1,17 @@
 import { Model, Types } from 'mongoose';
+import { ICustomizationOption as ICustomizationTemplate } from '../customizationOption/customizationOption.interface';
 import { CUSTOMIZATION_TYPE } from './product.constants';
 
-export type ICustomizationOption = {
+export type IProductCustomizationOptionSnapshot = {
   label: string;
   price: number;
 };
 
-export type ICustomization = {
+export type IProductCustomizationSnapshot = {
   name: string;
   type: CUSTOMIZATION_TYPE;
   isRequired: boolean;
-  options?: ICustomizationOption[];
+  options?: IProductCustomizationOptionSnapshot[];
   pricePerUnit?: number;
 };
 
@@ -21,7 +22,7 @@ export type IProduct = {
   image: string;
   category: Types.ObjectId;
   basePrice: number;
-  customizations: ICustomization[];
+  customizations: Types.ObjectId[] | ICustomizationTemplate[];
   dietaryLabels: string[];
   readyTime: number; // in minutes
   isActive: boolean;

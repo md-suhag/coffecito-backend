@@ -5,29 +5,7 @@ import { Product } from './product.model';
 import { Favorite } from '../favorite/favorite.model';
 import { CustomizationOption } from '../customizationOption/customizationOption.model';
 
-const createProductIntoDB = async (
-  payload: IProduct & { customizationIds?: string[] },
-) => {
-  if (payload.customizationIds && payload.customizationIds.length > 0) {
-    const customizationTemplates = await CustomizationOption.find({
-      _id: { $in: payload.customizationIds },
-    });
-
-    const customizations = customizationTemplates.map(template => ({
-      name: template.name,
-      type: template.type as any,
-      isRequired: template.isRequired,
-      options: template.options.map(opt => ({
-        label: opt.label,
-        price: opt.price,
-      })),
-    }));
-
-    payload.customizations = [
-      ...(payload.customizations || []),
-      ...customizations,
-    ];
-  }
+const createProductIntoDB = async (payload: IProduct) => {
   const result = await Product.create(payload);
   return result;
 };
@@ -44,7 +22,7 @@ const getAllProductsFromDB = async (
   }
 
   const productsQuery = new QueryBuilder(
-    Product.find().populate('store', 'name'),
+    Product.find().populate('store', 'name').populate('customizations'),
     queryObj,
   )
     .search(PRODUCT_SEARCHABLE_FIELDS)
@@ -63,31 +41,7 @@ const getAllProductsFromDB = async (
   };
 };
 
-const updateProductIntoDB = async (
-  id: string,
-  payload: Partial<IProduct> & { customizationIds?: string[] },
-) => {
-  if (payload.customizationIds && payload.customizationIds.length > 0) {
-    const customizationTemplates = await CustomizationOption.find({
-      _id: { $in: payload.customizationIds },
-    });
-
-    const customizations = customizationTemplates.map(template => ({
-      name: template.name,
-      type: template.type as any,
-      isRequired: template.isRequired,
-      options: template.options.map(opt => ({
-        label: opt.label,
-        price: opt.price,
-      })),
-    }));
-
-    payload.customizations = [
-      ...(payload.customizations || []),
-      ...customizations,
-    ];
-  }
-
+const updateProductIntoDB = async (id: string, payload: Partial<IProduct>) => {
   const result = await Product.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
@@ -107,7 +61,7 @@ const deleteProductFromDB = async (id: string) => {
 };
 
 const getProductByIdFromDB = async (id: string, userId?: string) => {
-  const result = await Product.findById(id).lean();
+  const result = await Product.findById(id).populate('customizations').lean();
 
   if (!result) {
     return null;

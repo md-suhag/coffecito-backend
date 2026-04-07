@@ -26,13 +26,15 @@ const addToCartIntoDB = async (
     }[];
   },
 ) => {
-  const product = await Product.findById(payload.product);
+  const product = await Product.findById(payload.product).populate(
+    'customizations',
+  );
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
   }
 
   // Check for required customizations
-  const requiredCustomizations = product.customizations.filter(
+  const requiredCustomizations = (product.customizations as any[]).filter(
     (c: any) => c.isRequired,
   );
   for (const required of requiredCustomizations) {
@@ -42,7 +44,7 @@ const addToCartIntoDB = async (
     if (!isProvided) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        `Customization "${required.name}" is required`,
+        `Customization "${(required as any).name}" is required`,
       );
     }
   }
@@ -52,7 +54,7 @@ const addToCartIntoDB = async (
   const processedCustomizations: ISelectedCustomization[] = [];
 
   for (const selected of payload.selectedCustomizations || []) {
-    const customization = product.customizations.find(
+    const customization = (product.customizations as any[]).find(
       (c: any) => c._id?.toString() === selected.customizationId,
     );
 

@@ -65,6 +65,7 @@ const createOrderIntoDB = async (
     for (const item of cart.items) {
       const product = await Product.findById(item.product)
         .populate('store')
+        .populate('customizations')
         .session(dbSession);
       if (!product) {
         throw new ApiError(
@@ -88,7 +89,7 @@ const createOrderIntoDB = async (
       const processedCustomizations = [];
 
       for (const selected of item.selectedCustomizations) {
-        const dbCust = product.customizations.find(
+        const dbCust = (product.customizations as any[]).find(
           (c: any) => c._id.toString() === selected.customizationId.toString(),
         );
         if (dbCust) {
