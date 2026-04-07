@@ -23,16 +23,43 @@ const createUserZodSchema = z.object({
     .strict(),
 });
 
+const numberFromString = z
+  .union([z.number(), z.string()])
+  .transform((val, ctx) => {
+    const num = typeof val === 'string' ? Number(val) : val;
+
+    if (Number.isNaN(num)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Must be a valid number',
+      });
+      return z.NEVER;
+    }
+
+    return num;
+  });
+
+const latitude = numberFromString.refine(
+  val => val >= -90 && val <= 90,
+  'Latitude must be between -90 and 90',
+);
+
+const longitude = numberFromString.refine(
+  val => val >= -180 && val <= 180,
+  'Longitude must be between -180 and 180',
+);
+
 const updateUserZodSchema = z.object({
   body: z
     .object({
       name: z.string().optional(),
       phone: z.string().optional(),
       address: z.string().optional(),
-      latitude: z.number().optional(),
-      longitude: z.number().optional(),
+      latitude: latitude.optional(),
+      longitude: longitude.optional(),
       isOnboard: z.boolean().optional(),
       deviceToken: z.string().optional(),
+      image: z.string().optional(),
     })
     .strict()
     .refine(
@@ -47,7 +74,7 @@ const updateUserZodSchema = z.object({
         );
       },
       {
-        message: 'Address, latitude, and longitude must be provided together',
+        message: 'address, latitude, and longitude must be provided together',
       },
     ),
 });
