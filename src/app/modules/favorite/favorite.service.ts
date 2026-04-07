@@ -63,7 +63,7 @@ const getMyFavoriteProducts = async (
   const favoriteProductsQuery = new QueryBuilder(
     Favorite.find({ user: userId, product: { $exists: true } }).populate(
       'product',
-      'name image basePrice dietaryLabels readyTime ',
+      'name image basePrice dietaryLabels readyTime',
     ),
     query,
   )

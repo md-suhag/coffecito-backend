@@ -26,7 +26,11 @@ const categorySchema = new Schema<ICategory, CategoryModel>(
 categorySchema.pre<Query<ICategory, ICategory>>(
   /^find|^count/,
   function (next) {
-    this.find({ isDeleted: false });
+    const filter = this.getFilter();
+    if (filter.isDeleted !== undefined) {
+      return next();
+    }
+    this.where({ isDeleted: { $ne: true } } as any);
     next();
   },
 );

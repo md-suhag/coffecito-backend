@@ -128,7 +128,11 @@ storeSchema.index({ location: '2dsphere' });
 
 // Filter out deleted stores for find and count queries
 storeSchema.pre(/^find|^count/, function (this: any, next) {
-  this.find({ isDeleted: { $ne: true } });
+  const filter = this.getFilter();
+  if (filter.isDeleted !== undefined) {
+    return next();
+  }
+  this.where({ isDeleted: { $ne: true } } as any);
   next();
 });
 

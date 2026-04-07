@@ -172,8 +172,16 @@ const getRecentOrdersFromDB = async () => {
   })
     .sort({ createdAt: -1 })
     .limit(10)
-    .populate('customer', 'name email phone profileImage')
-    .populate('store', 'name');
+    .populate({
+      path: 'customer',
+      select: 'name email phone profileImage',
+      match: { isDeleted: { $in: [true, false] } },
+    })
+    .populate({
+      path: 'store',
+      select: 'name',
+      match: { isDeleted: { $in: [true, false] } },
+    });
 
   return result;
 };

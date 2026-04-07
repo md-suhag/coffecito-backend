@@ -52,7 +52,11 @@ const customizationOptionSchema = new Schema<
 
 // Filter out deleted options for find and count queries
 customizationOptionSchema.pre(/^find|^count/, function (this: any, next) {
-  this.find({ isDeleted: { $ne: true } });
+  const filter = this.getFilter();
+  if (filter.isDeleted !== undefined) {
+    return next();
+  }
+  this.where({ isDeleted: { $ne: true } } as any);
   next();
 });
 

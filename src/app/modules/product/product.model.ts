@@ -118,7 +118,11 @@ const productSchema = new Schema<IProduct, ProductModel>(
 
 // Filter out deleted products for find and count queries
 productSchema.pre(/^find|^count/, function (this: any, next) {
-  this.find({ isDeleted: { $ne: true } });
+  const filter = this.getFilter();
+  if (filter.isDeleted !== undefined) {
+    return next();
+  }
+  this.where({ isDeleted: { $ne: true } } as any);
   next();
 });
 

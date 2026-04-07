@@ -146,10 +146,12 @@ const getAllOrdersFromDB = async (
       {
         path: 'customer',
         select: 'name email phone address ',
+        match: { isDeleted: { $in: [true, false] } },
       },
       {
         path: 'store',
         select: 'name address',
+        match: { isDeleted: { $in: [true, false] } },
       },
     ]),
     queryObj,
