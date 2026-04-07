@@ -438,6 +438,16 @@ const createOrderIntoDB = async (
         Order,
         'transactionId',
       );
+
+      const orderDescription = createdOrders
+        .map(
+          order =>
+            `${order.orderId} (${order.items
+              .map(item => `${item.productName} x${item.quantity}`)
+              .join(', ')})`,
+        )
+        .join(' | ');
+
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -447,7 +457,7 @@ const createOrderIntoDB = async (
               currency: 'usd',
               product_data: {
                 name: 'Coffecito Order Payment',
-                description: `Orders: ${orderIds.join(', ')}`,
+                description: orderDescription,
               },
               unit_amount: Math.round(totalCartAmount * 100),
             },
