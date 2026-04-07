@@ -153,6 +153,11 @@ const getAllOrdersFromDB = async (
         select: 'name address',
         match: { isDeleted: { $in: [true, false] } },
       },
+      {
+        path: 'items.product',
+        select: 'name image',
+        match: { isDeleted: { $in: [true, false] } },
+      },
     ]),
     queryObj,
   )
