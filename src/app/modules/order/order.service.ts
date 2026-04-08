@@ -65,6 +65,7 @@ const createOrderIntoDB = async (
     for (const item of cart.items) {
       const product = await Product.findById(item.product)
         .populate('store')
+        .populate('customizations')
         .session(dbSession);
       if (!product) {
         throw new ApiError(
@@ -88,7 +89,7 @@ const createOrderIntoDB = async (
       const processedCustomizations = [];
 
       for (const selected of item.selectedCustomizations) {
-        const dbCust = product.customizations.find(
+        const dbCust = (product.customizations as any[]).find(
           (c: any) => c._id.toString() === selected.customizationId.toString(),
         );
         if (dbCust) {
@@ -105,17 +106,25 @@ const createOrderIntoDB = async (
               });
             }
           } else if (dbCust.type === CUSTOMIZATION_TYPE.QUANTITY) {
-            const quantity =
-              selected.quantity !== undefined ? selected.quantity : 1;
-            const pricePerUnit = dbCust.pricePerUnit || 0;
-            const totalPrice = quantity * pricePerUnit;
-            unitFinalPrice += totalPrice;
-            processedCustomizations.push({
-              ...selected,
-              quantity,
-              pricePerUnit,
-              totalPrice,
-            });
+            const option = dbCust.options?.find(
+              (o: any) => o._id?.toString() === selected.optionId?.toString(),
+            );
+
+            if (option) {
+              const quantity =
+                selected.quantity !== undefined ? selected.quantity : 1;
+              const pricePerUnit = option.price || 0;
+              const totalPrice = quantity * pricePerUnit;
+              unitFinalPrice += totalPrice;
+              processedCustomizations.push({
+                ...selected,
+                optionId: (option as any)._id,
+                optionLabel: option.label,
+                quantity,
+                pricePerUnit,
+                totalPrice,
+              });
+            }
           }
         }
       }

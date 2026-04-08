@@ -2,51 +2,6 @@ import { Schema, model } from 'mongoose';
 import { IProduct, ProductModel } from './product.interface';
 import { CUSTOMIZATION_TYPE } from './product.constants';
 
-const optionSchema = new Schema(
-  {
-    label: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-  },
-  { _id: true },
-);
-
-const customizationSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    type: {
-      type: String,
-      enum: Object.values(CUSTOMIZATION_TYPE),
-      required: true,
-    },
-    isRequired: {
-      type: Boolean,
-      default: false,
-    },
-
-    // For single & multi select
-    options: [optionSchema],
-
-    // For quantity type
-    pricePerUnit: {
-      type: Number,
-      min: 0,
-    },
-  },
-  { _id: true },
-);
-
 const productSchema = new Schema<IProduct, ProductModel>(
   {
     store: {
@@ -74,7 +29,7 @@ const productSchema = new Schema<IProduct, ProductModel>(
     },
 
     category: {
-      type: Schema.Types.ObjectId, // better than String
+      type: Schema.Types.ObjectId,
       ref: 'Category',
       required: true,
       index: true,
@@ -85,8 +40,12 @@ const productSchema = new Schema<IProduct, ProductModel>(
       required: true,
       min: 0,
     },
-    // Advanced customization engine
-    customizations: [customizationSchema],
+    customizations: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'CustomizationOption',
+      },
+    ],
 
     dietaryLabels: [
       {

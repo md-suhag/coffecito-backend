@@ -26,13 +26,15 @@ const addToCartIntoDB = async (
     }[];
   },
 ) => {
-  const product = await Product.findById(payload.product);
+  const product = await Product.findById(payload.product).populate(
+    'customizations',
+  );
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
   }
 
   // Check for required customizations
-  const requiredCustomizations = product.customizations.filter(
+  const requiredCustomizations = (product.customizations as any[]).filter(
     (c: any) => c.isRequired,
   );
   for (const required of requiredCustomizations) {
@@ -42,7 +44,7 @@ const addToCartIntoDB = async (
     if (!isProvided) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        `Customization "${required.name}" is required`,
+        `Customization "${(required as any).name}" is required`,
       );
     }
   }
@@ -52,24 +54,33 @@ const addToCartIntoDB = async (
   const processedCustomizations: ISelectedCustomization[] = [];
 
   for (const selected of payload.selectedCustomizations || []) {
-    const customization = product.customizations.find(
+    const customization = (product.customizations as any[]).find(
       (c: any) => c._id?.toString() === selected.customizationId,
     );
 
     if (customization) {
       if (customization.type === CUSTOMIZATION_TYPE.QUANTITY) {
-        const quantity =
-          selected.quantity !== undefined ? selected.quantity : 1;
-        const pricePerUnit = customization.pricePerUnit || 0;
-        const totalPriceForCust = quantity * pricePerUnit;
-        processedCustomizations.push({
-          customizationId: (customization as any)._id,
-          name: customization.name,
-          quantity: quantity,
-          pricePerUnit,
-          totalPrice: totalPriceForCust,
-        });
-        unitFinalPrice += totalPriceForCust;
+        const option = customization.options?.find(
+          (o: any) => o._id?.toString() === selected.optionId,
+        );
+
+        if (option) {
+          const quantity =
+            selected.quantity !== undefined ? selected.quantity : 1;
+          const pricePerUnit = option.price || 0;
+          const totalPriceForCust = quantity * pricePerUnit;
+
+          processedCustomizations.push({
+            customizationId: (customization as any)._id,
+            name: customization.name,
+            optionId: (option as any)._id,
+            optionLabel: option.label,
+            quantity: quantity,
+            pricePerUnit,
+            totalPrice: totalPriceForCust,
+          });
+          unitFinalPrice += totalPriceForCust;
+        }
       } else {
         // Handle array of option IDs (multi-select/single-select)
         const optionsToProcess =
