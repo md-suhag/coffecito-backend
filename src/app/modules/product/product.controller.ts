@@ -9,6 +9,7 @@ const createProduct = catchAsync(async (req: Request, res: Response) => {
   let image = getSingleFilePath(req.files, 'image');
 
   const data = {
+    customizations: req.body.customizationIds,
     image,
     ...req.body,
   };
@@ -23,7 +24,10 @@ const createProduct = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllProducts = catchAsync(async (req: Request, res: Response) => {
-  const result = await ProductServices.getAllProductsFromDB(req.query, req.user);
+  const result = await ProductServices.getAllProductsFromDB(
+    req.query,
+    req.user,
+  );
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -39,7 +43,9 @@ const updateProduct = catchAsync(async (req: Request, res: Response) => {
 
   let image = getSingleFilePath(req.files, 'image');
 
-  const data = image ? { image, ...req.body } : { ...req.body };
+  const data = image
+    ? { image, ...req.body, customizations: req.body.customizationIds }
+    : { ...req.body, customizations: req.body.customizationIds };
 
   const result = await ProductServices.updateProductIntoDB(id, data);
 

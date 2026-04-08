@@ -111,7 +111,7 @@ const updateStoreIntoDB = async (id: string, payload: Partial<IStore>) => {
   ) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Stripe account is not connected. Please connect your stripe account first.',
+      'Stripe account is not connected. Please connect your stripe account first for this shop.',
     );
   }
   const result = await Store.findByIdAndUpdate(id, payload, {

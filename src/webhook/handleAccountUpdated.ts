@@ -9,6 +9,7 @@ export const handleAccountUpdated = async (event: Stripe.Event) => {
       { stripeAccountId: account.id },
       {
         isConnectedAccountReady: true,
+        isActive: true,
       },
     );
   }
