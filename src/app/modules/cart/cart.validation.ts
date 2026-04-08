@@ -31,7 +31,15 @@ const updateQuantityValidationSchema = z.object({
   }),
 });
 
+const updateCartAddonsValidationSchema = z.object({
+  body: z.object({
+    tipAmount: z.number().min(0).optional(),
+    redeemLoyaltyPoints: z.number().min(0).optional(),
+  }),
+});
+
 export const CartValidations = {
   addToCartValidationSchema,
   updateQuantityValidationSchema,
+  updateCartAddonsValidationSchema,
 };

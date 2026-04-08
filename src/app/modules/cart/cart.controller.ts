@@ -70,10 +70,36 @@ const clearCart = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateCartAddons = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await CartServices.updateCartAddonsInDB(user.id, req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Cart add-ons updated successfully',
+    data: result,
+  });
+});
+
+const getCartAddonsSummary = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await CartServices.getCartAddonsSummaryFromDB(user.id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Cart add-ons summary fetched successfully',
+    data: result,
+  });
+});
+
 export const CartController = {
   getCart,
   addToCart,
   updateQuantity,
   removeItemFromCart,
   clearCart,
+  updateCartAddons,
+  getCartAddonsSummary,
 };

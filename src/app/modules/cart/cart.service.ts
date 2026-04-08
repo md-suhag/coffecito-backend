@@ -4,6 +4,8 @@ import { ICart, ICartItem, ISelectedCustomization } from './cart.interface';
 import { Cart } from './cart.model';
 import { Product } from '../product/product.model';
 import { CUSTOMIZATION_TYPE } from '../product/product.constants';
+import { Customer } from '../customer/customer.model';
+import { LOYALTY_POINTS_PER_DOLLAR } from '../order/order.constants';
 
 const getCartFromDB = async (userId: string) => {
   const result = await Cart.findOne({ user: userId }).populate(
@@ -11,6 +13,24 @@ const getCartFromDB = async (userId: string) => {
     'readyTime image name',
   );
   return result;
+};
+
+const calculateCartTotals = (cart: any) => {
+  cart.totalQuantity = cart.items.reduce(
+    (acc: number, item: any) => acc + item.quantity,
+    0,
+  );
+  cart.totalPrice = cart.items.reduce(
+    (acc: number, item: any) => acc + item.itemTotalPrice,
+    0,
+  );
+
+  cart.loyaltyPointDiscount =
+    cart.redeemLoyaltyPoints / LOYALTY_POINTS_PER_DOLLAR;
+  cart.totalPayableAmount = Math.max(
+    0,
+    cart.totalPrice - cart.loyaltyPointDiscount + cart.tipAmount,
+  );
 };
 
 const addToCartIntoDB = async (
@@ -156,11 +176,7 @@ const addToCartIntoDB = async (
   }
 
   // Recalculate cart totals
-  cart.totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
-  cart.totalPrice = cart.items.reduce(
-    (acc, item) => acc + item.itemTotalPrice,
-    0,
-  );
+  calculateCartTotals(cart);
 
   await cart.save();
   return cart;
@@ -192,11 +208,7 @@ const updateQuantityInDB = async (
   }
 
   // Recalculate cart totals
-  cart.totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
-  cart.totalPrice = cart.items.reduce(
-    (acc, item) => acc + item.itemTotalPrice,
-    0,
-  );
+  calculateCartTotals(cart);
 
   await cart.save();
   return cart;
@@ -213,11 +225,7 @@ const removeItemFromDB = async (userId: string, itemId: string) => {
   );
 
   // Recalculate cart totals
-  cart.totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
-  cart.totalPrice = cart.items.reduce(
-    (acc, item) => acc + item.itemTotalPrice,
-    0,
-  );
+  calculateCartTotals(cart);
 
   await cart.save();
   return cart;
@@ -229,8 +237,68 @@ const clearCartFromDB = async (userId: string) => {
     cart.items = [];
     cart.totalPrice = 0;
     cart.totalQuantity = 0;
+    cart.tipAmount = 0;
+    cart.redeemLoyaltyPoints = 0;
+    cart.loyaltyPointDiscount = 0;
+    cart.totalPayableAmount = 0;
     await cart.save();
   }
+  return cart;
+};
+
+const updateCartAddonsInDB = async (
+  userId: string,
+  payload: { tipAmount?: number; redeemLoyaltyPoints?: number },
+) => {
+  const cart = await Cart.findOne({ user: userId });
+  if (!cart) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Cart not found');
+  }
+
+  if (payload.tipAmount !== undefined) {
+    cart.tipAmount = payload.tipAmount;
+  }
+
+  if (payload.redeemLoyaltyPoints !== undefined) {
+    const customer = await Customer.findOne({ user: userId });
+    if (!customer) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Customer profile not found');
+    }
+
+    if (payload.redeemLoyaltyPoints > customer.loyaltyPoints) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        `Insufficient loyalty points. You have ${customer.loyaltyPoints} points.`,
+      );
+    }
+
+    cart.redeemLoyaltyPoints = payload.redeemLoyaltyPoints;
+    cart.loyaltyPointDiscount =
+      payload.redeemLoyaltyPoints / LOYALTY_POINTS_PER_DOLLAR;
+  }
+
+  // Final recalculation
+  calculateCartTotals(cart);
+
+  await cart.save();
+  return cart;
+};
+
+const getCartAddonsSummaryFromDB = async (userId: string) => {
+  const cart = await Cart.findOne({ user: userId }).select(
+    'tipAmount redeemLoyaltyPoints loyaltyPointDiscount totalPayableAmount totalPrice',
+  );
+
+  if (!cart) {
+    return {
+      totalPrice: 0,
+      tipAmount: 0,
+      redeemLoyaltyPoints: 0,
+      loyaltyPointDiscount: 0,
+      totalPayableAmount: 0,
+    };
+  }
+
   return cart;
 };
 
@@ -240,4 +308,6 @@ export const CartServices = {
   updateQuantityInDB,
   removeItemFromDB,
   clearCartFromDB,
+  updateCartAddonsInDB,
+  getCartAddonsSummaryFromDB,
 };

@@ -35,4 +35,17 @@ router.delete(
 
 router.delete('/clear', auth(USER_ROLES.CUSTOMER), CartController.clearCart);
 
+router.patch(
+  '/addons',
+  auth(USER_ROLES.CUSTOMER),
+  validateRequest(CartValidations.updateCartAddonsValidationSchema),
+  CartController.updateCartAddons,
+);
+
+router.get(
+  '/addons-summary',
+  auth(USER_ROLES.CUSTOMER),
+  CartController.getCartAddonsSummary,
+);
+
 export const cartRoutes = router;

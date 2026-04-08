@@ -36,6 +36,10 @@ const cartSchema = new Schema<ICart, CartModel>(
     items: [cartItemSchema],
     totalPrice: { type: Number, required: true, default: 0 },
     totalQuantity: { type: Number, required: true, default: 0 },
+    tipAmount: { type: Number, default: 0 },
+    redeemLoyaltyPoints: { type: Number, default: 0 },
+    loyaltyPointDiscount: { type: Number, default: 0 },
+    totalPayableAmount: { type: Number, default: 0 },
   },
   {
     timestamps: true,

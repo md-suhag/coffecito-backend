@@ -27,6 +27,10 @@ export type ICart = {
   items: ICartItem[];
   totalPrice: number;
   totalQuantity: number;
+  tipAmount: number;
+  redeemLoyaltyPoints: number;
+  loyaltyPointDiscount: number;
+  totalPayableAmount: number;
   createdAt?: Date;
   updatedAt?: Date;
 };
