@@ -60,18 +60,27 @@ const addToCartIntoDB = async (
 
     if (customization) {
       if (customization.type === CUSTOMIZATION_TYPE.QUANTITY) {
-        const quantity =
-          selected.quantity !== undefined ? selected.quantity : 1;
-        const pricePerUnit = customization.pricePerUnit || 0;
-        const totalPriceForCust = quantity * pricePerUnit;
-        processedCustomizations.push({
-          customizationId: (customization as any)._id,
-          name: customization.name,
-          quantity: quantity,
-          pricePerUnit,
-          totalPrice: totalPriceForCust,
-        });
-        unitFinalPrice += totalPriceForCust;
+        const option = customization.options?.find(
+          (o: any) => o._id?.toString() === selected.optionId,
+        );
+
+        if (option) {
+          const quantity =
+            selected.quantity !== undefined ? selected.quantity : 1;
+          const pricePerUnit = option.price || 0;
+          const totalPriceForCust = quantity * pricePerUnit;
+
+          processedCustomizations.push({
+            customizationId: (customization as any)._id,
+            name: customization.name,
+            optionId: (option as any)._id,
+            optionLabel: option.label,
+            quantity: quantity,
+            pricePerUnit,
+            totalPrice: totalPriceForCust,
+          });
+          unitFinalPrice += totalPriceForCust;
+        }
       } else {
         // Handle array of option IDs (multi-select/single-select)
         const optionsToProcess =
