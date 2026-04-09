@@ -4,6 +4,7 @@ import { IProduct } from './product.interface';
 import { Product } from './product.model';
 import { Favorite } from '../favorite/favorite.model';
 import { CustomizationOption } from '../customizationOption/customizationOption.model';
+import { User } from '../user/user.model';
 
 const createProductIntoDB = async (payload: IProduct) => {
   const result = await Product.create(payload);
@@ -14,11 +15,12 @@ const getAllProductsFromDB = async (
   query: Record<string, unknown>,
   user: any,
 ) => {
+  const existingUser = await User.findById(user.id).select('role store').lean();
   const queryObj = { ...query };
 
   // If user is not super_admin and has a store assigned, restrict to that store
-  if (user?.role !== 'super_admin' && user?.store) {
-    queryObj.store = user.store;
+  if (existingUser?.role !== 'super_admin' && existingUser?.store) {
+    queryObj.store = existingUser.store;
   }
 
   const productsQuery = new QueryBuilder(

@@ -285,9 +285,11 @@ const updateCartAddonsInDB = async (
 };
 
 const getCartAddonsSummaryFromDB = async (userId: string) => {
-  const cart = await Cart.findOne({ user: userId }).select(
-    'tipAmount redeemLoyaltyPoints loyaltyPointDiscount totalPayableAmount totalPrice',
-  );
+  const cart = await Cart.findOne({ user: userId })
+    .select(
+      'tipAmount redeemLoyaltyPoints loyaltyPointDiscount totalPayableAmount totalPrice',
+    )
+    .lean();
 
   if (!cart) {
     return {
@@ -296,10 +298,14 @@ const getCartAddonsSummaryFromDB = async (userId: string) => {
       redeemLoyaltyPoints: 0,
       loyaltyPointDiscount: 0,
       totalPayableAmount: 0,
+      minimumLoyaltyPointsNeededToUse: LOYALTY_POINTS_PER_DOLLAR,
     };
   }
 
-  return cart;
+  return {
+    ...cart,
+    minimumLoyaltyPointsNeededToUse: LOYALTY_POINTS_PER_DOLLAR,
+  };
 };
 
 export const CartServices = {

@@ -132,11 +132,12 @@ const getAllOrdersFromDB = async (
   query: Record<string, any>,
   user: JwtPayload,
 ) => {
+  const existingUser = await User.findById(user.id).select('role store').lean();
   const queryObj = { ...query };
 
   // If user is not super_admin and has a store assigned, restrict to that store
-  if (user?.role !== 'super_admin' && user?.store) {
-    queryObj.store = user.store;
+  if (existingUser?.role !== 'super_admin' && existingUser?.store) {
+    queryObj.store = existingUser.store;
   }
 
   const ordersQuery = new QueryBuilder(
@@ -221,7 +222,7 @@ const getAllCreatedUsersFromDB = async (query: Record<string, any>) => {
       role: {
         $in: [USER_ROLES.ADMIN, USER_ROLES.BARISTA, USER_ROLES.MARKETER],
       },
-    }),
+    }).populate('store', 'name'),
     query,
   )
     .sort()

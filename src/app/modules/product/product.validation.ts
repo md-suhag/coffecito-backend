@@ -3,7 +3,7 @@ import { CUSTOMIZATION_TYPE } from './product.constants';
 
 const createProductValidationSchema = z.object({
   body: z.object({
-    store: z.string({ required_error: 'Store ID is required' }),
+    store: z.string().optional(),
     name: z.string({ required_error: 'Product name is required' }),
     description: z.string({
       required_error: 'Product description is required',

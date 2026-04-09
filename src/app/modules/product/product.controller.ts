@@ -4,14 +4,43 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { getSingleFilePath } from '../../../shared/getFilePath';
+import ApiError from '../../../errors/ApiError';
+import { User } from '../user/user.model';
+import { USER_ROLES } from '../user/user.constant';
 
 const createProduct = catchAsync(async (req: Request, res: Response) => {
   let image = getSingleFilePath(req.files, 'image');
 
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  const payload = { ...req.body };
+
+  // Logic: Store ID is required for Super Admin, but forced for Admin
+  if (user.role === USER_ROLES.SUPER_ADMIN) {
+    if (!payload.store) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Store ID is required for Super Admin',
+      );
+    }
+  } else {
+    // For Admin and other store roles, always use their own store (ignore body)
+    if (!user.store) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Your account is not assigned to any store',
+      );
+    }
+    payload.store = user.store.toString();
+  }
+
   const data = {
-    customizations: req.body.customizationIds,
+    ...payload,
+    customizations: payload.customizationIds,
     image,
-    ...req.body,
   };
   const result = await ProductServices.createProductIntoDB(data);
 
@@ -43,9 +72,25 @@ const updateProduct = catchAsync(async (req: Request, res: Response) => {
 
   let image = getSingleFilePath(req.files, 'image');
 
-  const data = image
-    ? { image, ...req.body, customizations: req.body.customizationIds }
-    : { ...req.body, customizations: req.body.customizationIds };
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  const payload = { ...req.body };
+
+  // Strict store enforcement for update as well
+  if (user.role !== USER_ROLES.SUPER_ADMIN) {
+    if (user.store) {
+      payload.store = user.store.toString();
+    }
+  }
+
+  const data = {
+    ...payload,
+    customizations: payload.customizationIds,
+    ...(image && { image }),
+  };
 
   const result = await ProductServices.updateProductIntoDB(id, data);
 
