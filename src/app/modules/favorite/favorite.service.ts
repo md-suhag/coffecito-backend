@@ -71,12 +71,17 @@ const getMyFavoriteProducts = async (
     .paginate();
 
   const [favoriteProducts, meta] = await Promise.all([
-    favoriteProductsQuery.modelQuery,
+    favoriteProductsQuery.modelQuery.lean(),
     favoriteProductsQuery.getPaginationInfo(),
   ]);
 
   return {
-    favoriteProducts,
+    favoriteProducts: favoriteProducts.map(item => {
+      return {
+        ...item,
+        isFavorite: true,
+      };
+    }),
     meta,
   };
 };
@@ -95,12 +100,17 @@ const getMyFavoriteStores = async (
     .paginate();
 
   const [favoriteStores, meta] = await Promise.all([
-    favoriteStoresQuery.modelQuery,
+    favoriteStoresQuery.modelQuery.lean(),
     favoriteStoresQuery.getPaginationInfo(),
   ]);
 
   return {
-    favoriteStores,
+    favoriteStores: favoriteStores.map(item => {
+      return {
+        ...item,
+        isFavorite: true,
+      };
+    }),
     meta,
   };
 };
