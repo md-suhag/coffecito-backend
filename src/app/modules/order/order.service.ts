@@ -147,7 +147,7 @@ const createOrderIntoDB = async (
     let totalCartAmount = 0;
     const ordersToCreate: any[] = [];
     const tipAmount = payload.tipAmount || 0;
-    const tipPerStore = tipAmount / storeIds.length;
+    const tipPerStore = Math.round((tipAmount / storeIds.length) * 100) / 100;
 
     const customerRecord = await Customer.findOne({ user: userId }).session(
       dbSession,
@@ -203,12 +203,15 @@ const createOrderIntoDB = async (
       // Proportional discount if applicable
       const orderProportion =
         totalOrderSubtotal > 0 ? storeData.subtotal / totalOrderSubtotal : 0;
-      const orderDiscount = totalLoyaltyDiscount * orderProportion;
+      const orderDiscount =
+        Math.round(totalLoyaltyDiscount * orderProportion * 100) / 100;
       const orderPointsUsed = pointsToDeduct * orderProportion;
 
       const taxAmount = 0;
       const totalAmount =
-        storeData.subtotal + taxAmount + tipPerStore - orderDiscount;
+        Math.round(
+          (storeData.subtotal + taxAmount + tipPerStore - orderDiscount) * 100,
+        ) / 100;
       totalCartAmount += totalAmount;
       storeOrders[storeId].totalAmount = totalAmount;
 
