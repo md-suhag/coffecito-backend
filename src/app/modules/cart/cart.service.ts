@@ -255,7 +255,7 @@ const updateCartAddonsInDB = async (
   }
 
   if (payload.tipAmount !== undefined) {
-    cart.tipAmount = Math.round(payload.tipAmount);
+    cart.tipAmount = Math.round(payload.tipAmount * 100) / 100;
   }
 
   if (payload.redeemLoyaltyPoints !== undefined) {
