@@ -237,7 +237,7 @@ const createOrderIntoDB = async (
     }
 
     // 4. Create Orders (Initially PENDING)
-    const createdOrders = await Order.create(ordersToCreate, {
+    const createdOrders = await Order.insertMany(ordersToCreate, {
       session: dbSession,
     });
     const orderIds = createdOrders.map(o => o._id.toString());
