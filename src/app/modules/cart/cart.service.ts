@@ -8,10 +8,9 @@ import { Customer } from '../customer/customer.model';
 import { LOYALTY_POINTS_PER_DOLLAR } from '../order/order.constants';
 
 const getCartFromDB = async (userId: string) => {
-  const result = await Cart.findOne({ user: userId }).populate(
-    'items.product',
-    'readyTime image name',
-  );
+  const result = await Cart.findOne({ user: userId })
+    .populate('items.product', 'readyTime image name')
+    .lean();
   return result;
 };
 
@@ -46,9 +45,9 @@ const addToCartIntoDB = async (
     }[];
   },
 ) => {
-  const product = await Product.findById(payload.product).populate(
-    'customizations',
-  );
+  const product = await Product.findById(payload.product)
+    .populate('customizations')
+    .lean();
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
   }
@@ -256,7 +255,7 @@ const updateCartAddonsInDB = async (
   }
 
   if (payload.tipAmount !== undefined) {
-    cart.tipAmount = payload.tipAmount;
+    cart.tipAmount = Math.round(payload.tipAmount);
   }
 
   if (payload.redeemLoyaltyPoints !== undefined) {
