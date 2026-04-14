@@ -39,6 +39,10 @@ import { NotificationHelper } from '../../../helpers/notificationHelper';
 import { NOTIFICATION_TYPE } from '../notification/notification.interface';
 import { PointTransactionServices } from '../pointTransaction/pointTransaction.service';
 import { POINT_TRANSACTION_TYPE } from '../pointTransaction/pointTransaction.constants';
+import {
+  recordStoreEarning,
+  calculateEstimatedStripeFee,
+} from '../../../util/storeWalletHelper';
 
 const createOrderIntoDB = async (
   userId: string,
@@ -349,6 +353,20 @@ const createOrderIntoDB = async (
         data: { orderId: createdOrders[0]._id.toString() },
       });
 
+      // Record store earnings for Wallet payment
+      for (const order of createdOrders) {
+        const storeId = order.store.toString();
+        const estimatedFee = calculateEstimatedStripeFee(order.totalAmount);
+        await recordStoreEarning(
+          storeId,
+          order._id.toString(),
+          order.totalAmount,
+          estimatedFee,
+          'WALLET',
+          dbSession,
+        );
+      }
+
       // Earn points for Wallet payment
       await PointTransactionServices.earnPoints(
         userId,
@@ -444,6 +462,20 @@ const createOrderIntoDB = async (
         type: NOTIFICATION_TYPE.ORDER,
         data: { orderId: createdOrders[0]._id.toString() },
       });
+
+      // Record store earnings for Gift Card payment
+      for (const order of createdOrders) {
+        const storeId = order.store.toString();
+        const estimatedFee = calculateEstimatedStripeFee(order.totalAmount);
+        await recordStoreEarning(
+          storeId,
+          order._id.toString(),
+          order.totalAmount,
+          estimatedFee,
+          'GIFT_CARD',
+          dbSession,
+        );
+      }
 
       // Earn points for Gift Card payment
       await PointTransactionServices.earnPoints(

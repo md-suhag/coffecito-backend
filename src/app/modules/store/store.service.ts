@@ -10,9 +10,19 @@ import config from '../../../config';
 import { Product } from '../product/product.model';
 import { PRODUCT_SEARCHABLE_FIELDS } from '../product/product.constants';
 import { Favorite } from '../favorite/favorite.model';
+import { StoreWallet } from '../storeWallet/storeWallet.model';
 
 const createStoreIntoDB = async (payload: IStore) => {
   const result = await Store.create(payload);
+
+  // Auto-create a StoreWallet for the new store
+  await StoreWallet.create({
+    store: result._id,
+    balance: 0,
+    totalEarned: 0,
+    totalWithdrawn: 0,
+  });
+
   return result;
 };
 
