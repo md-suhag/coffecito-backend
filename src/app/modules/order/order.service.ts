@@ -327,6 +327,10 @@ const createOrderIntoDB = async (
       cart.items = [];
       cart.totalPrice = 0;
       cart.totalQuantity = 0;
+      cart.tipAmount = 0;
+      cart.redeemLoyaltyPoints = 0;
+      cart.loyaltyPointDiscount = 0;
+      cart.totalPayableAmount = 0;
       await cart.save({ session: dbSession });
 
       // Update last order in customer profile
@@ -419,6 +423,10 @@ const createOrderIntoDB = async (
       cart.items = [];
       cart.totalPrice = 0;
       cart.totalQuantity = 0;
+      cart.tipAmount = 0;
+      cart.redeemLoyaltyPoints = 0;
+      cart.loyaltyPointDiscount = 0;
+      cart.totalPayableAmount = 0;
       await cart.save({ session: dbSession });
 
       // Update last order in customer profile
