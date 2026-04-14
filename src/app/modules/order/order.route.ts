@@ -32,14 +32,14 @@ router.post(
 );
 
 router.get(
+  '/transactions/history',
+  auth(USER_ROLES.CUSTOMER),
+  OrderController.getMyOrderTransactions,
+);
+router.get(
   '/:id',
   auth(USER_ROLES.CUSTOMER),
   OrderController.getMyOrderDetails,
 );
 
-router.get(
-  '/transactions/history',
-  auth(USER_ROLES.CUSTOMER),
-  OrderController.getMyOrderTransactions,
-);
 export const orderRoutes = router;

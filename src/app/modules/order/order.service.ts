@@ -610,7 +610,12 @@ const getMyCompletedOrdersFromDB = async (
       orderStatus: {
         $in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
       },
-    }).populate('store', 'name image address'),
+    })
+    .populate('store', 'name image address')
+    .populate({
+      path: 'items.product',
+      select: 'image readyTime',
+    }),
     query,
   )
     .sort()
