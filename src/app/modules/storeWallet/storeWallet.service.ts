@@ -39,12 +39,14 @@ const getStoreTransactionsFromDB = async (
   query: Record<string, unknown>,
 ) => {
   const transactionsQuery = new QueryBuilder(
-    StoreTransaction.find({ store: storeId })
-      .populate('order', 'orderId totalAmount')
-      .sort({ createdAt: -1 }),
+    StoreTransaction.find({ store: storeId }).populate(
+      'order',
+      'orderId totalAmount',
+    ),
     query,
   )
     .filter()
+    .sort()
     .paginate();
 
   const [transactions, meta] = await Promise.all([
